@@ -1,4 +1,5 @@
 ﻿using Library.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Controllers
@@ -13,7 +14,7 @@ namespace Library.Controllers
             _context = librarycontext;
         }
 
-        [HttpGet]
+        [HttpGet,Authorize]
         public IActionResult FindAdmins()
         {
             var admins = _context.Admins.ToList();

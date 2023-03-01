@@ -36,18 +36,18 @@ namespace Library.Controllers
             _context.SaveChanges();
             return Ok();
         }
-        [HttpPost("login")] //endpoint
+        //[HttpPost("login")] //endpoint
 
-        public IActionResult Login([FromBody] Credentials user)
-        {
-            var loginUser = _context.Users.FirstOrDefault(x => x.Email == user.Email && x.Password == user.Password); 
-            if (loginUser == null)
-            {
-                return BadRequest("Kullanıcı email'i veya şifre hatalı");
-            }
+        //public IActionResult Login([FromBody] Credentials user)
+        //{
+        //    var loginUser = _context.Users.FirstOrDefault(x => x.Email == user.Email && x.Password == user.Password); 
+        //    if (loginUser == null)
+        //    {
+        //        return BadRequest("Kullanıcı email'i veya şifre hatalı");
+        //    }
 
-            return Ok(loginUser);
-        }
+        //    return Ok(loginUser);
+        //}
 
     }
 }
