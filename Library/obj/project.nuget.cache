@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "aiMJbq/kKusQ0IZO9xoCszHqlsMZFINQAyp/83JlKfeapFRRGiBLswsSBdYIT44hERWAxQWyTo16REmSaSGPpg==",
+  "dgSpecHash": "e60XgONdcMGfygF7DC0HymWGM8bOO2gVO8P1/X5ar4QRPEgg9StrltKn8mtrssDuPx40TL/iVFNntw6AM5QXhA==",
   "success": true,
   "projectFilePath": "C:\\Users\\FATMA YILMAZ\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\Library.csproj",
   "expectedPackageFiles": [
@@ -54,7 +54,10 @@
     "C:\\Users\\FATMA YILMAZ\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
     "C:\\Users\\FATMA YILMAZ\\.nuget\\packages\\npgsql\\6.0.7\\npgsql.6.0.7.nupkg.sha512",
     "C:\\Users\\FATMA YILMAZ\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\6.0.7\\npgsql.entityframeworkcore.postgresql.6.0.7.nupkg.sha512",
+    "C:\\Users\\FATMA YILMAZ\\.nuget\\packages\\scrutor\\3.3.0\\scrutor.3.3.0.nupkg.sha512",
     "C:\\Users\\FATMA YILMAZ\\.nuget\\packages\\swashbuckle.aspnetcore\\6.4.0\\swashbuckle.aspnetcore.6.4.0.nupkg.sha512",
+    "C:\\Users\\FATMA YILMAZ\\.nuget\\packages\\swashbuckle.aspnetcore.filters\\7.0.6\\swashbuckle.aspnetcore.filters.7.0.6.nupkg.sha512",
+    "C:\\Users\\FATMA YILMAZ\\.nuget\\packages\\swashbuckle.aspnetcore.filters.abstractions\\7.0.6\\swashbuckle.aspnetcore.filters.abstractions.7.0.6.nupkg.sha512",
     "C:\\Users\\FATMA YILMAZ\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.4.0\\swashbuckle.aspnetcore.swagger.6.4.0.nupkg.sha512",
     "C:\\Users\\FATMA YILMAZ\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.4.0\\swashbuckle.aspnetcore.swaggergen.6.4.0.nupkg.sha512",
     "C:\\Users\\FATMA YILMAZ\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\6.4.0\\swashbuckle.aspnetcore.swaggerui.6.4.0.nupkg.sha512",

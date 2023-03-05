@@ -14,7 +14,7 @@ namespace Library.Controllers
             _context = librarycontext;
         }
 
-        [HttpGet,Authorize]
+        [HttpGet,Authorize(Roles = "SuperAdmin")]
         public IActionResult FindAdmins()
         {
             var admins = _context.Admins.ToList();

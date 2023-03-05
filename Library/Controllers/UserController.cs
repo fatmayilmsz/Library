@@ -1,4 +1,5 @@
 ﻿using Library.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 
@@ -14,7 +15,7 @@ namespace Library.Controllers
             _context = librarycontext;
         }
 
-        [HttpGet]
+        [HttpGet,Authorize(Roles = "SuperAdmin")]
         public IActionResult FindUsers()
         {
             var users = _context.Users.ToList();

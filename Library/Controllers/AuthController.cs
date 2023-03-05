@@ -13,7 +13,6 @@ namespace Library.Controllers
     public class AuthController : ControllerBase
     {
         public static UserDto userDto = new UserDto();
-        public static AuthResponse authResponse = new AuthResponse();
 
         private readonly IConfiguration _configuration;
         private readonly LibraryContext _context;
@@ -38,6 +37,7 @@ namespace Library.Controllers
                 LastName = request.LastName,
                 Email = request.Email,
                 Password = passwordHash,
+                Role= request.Role,
             });
             _context.SaveChanges();
             return Ok();
@@ -64,6 +64,7 @@ namespace Library.Controllers
             userDto.LastName = userInDb.LastName;
             userDto.Email = userInDb.Email;
             userDto.PasswordHash = userInDb.Password;
+            userDto.Role = userInDb.Role;
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, userDto.PasswordHash))
             {
@@ -84,15 +85,33 @@ namespace Library.Controllers
                 LastName = userInDb.LastName,
                 Email = userInDb.Email,
                 PasswordHash = userDto.PasswordHash, 
+                Role= userDto.Role,
                 Token = (string)accessToken,
             });
         }
         private string CreateToken(UserDto user)
         {
+
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name,user.Name)
+                new Claim(ClaimTypes.Name,user.Name),
+
             };
+
+            if (user.Role == 1)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "User")); 
+            }
+            else if(user.Role == 2)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            }
+            else if(user.Role == 3) 
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "SuperAdmin"));
+            }
+
+      
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
             var token = new JwtSecurityToken(
