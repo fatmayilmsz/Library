@@ -20,22 +20,7 @@ namespace Library.Controllers
             var users = _context.Users.ToList();
             return Ok(users);
         }
-        [HttpPost]
-        public IActionResult Post([FromBody] User user)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest("Invalid data.");
 
-            _context.Users.Add(new User()
-            {
-                Name = user.Name,
-                LastName = user.LastName,
-                Email = user.Email,
-                Password = user.Password,
-            });
-            _context.SaveChanges();
-            return Ok();
-        }
         //[HttpPost("login")] //endpoint
 
         //public IActionResult Login([FromBody] Credentials user)

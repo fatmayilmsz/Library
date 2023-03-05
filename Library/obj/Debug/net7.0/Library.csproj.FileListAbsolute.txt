@@ -78,3 +78,4 @@ C:\Users\FATMA YILMAZ\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\
 C:\Users\FATMA YILMAZ\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
 C:\Users\FATMA YILMAZ\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Npgsql.dll
 C:\Users\FATMA YILMAZ\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\FATMA YILMAZ\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\BCrypt.Net-Next.dll

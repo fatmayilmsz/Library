@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -69,19 +70,18 @@ builder.Services
 builder.Services
     .AddIdentityCore<IdentityUser>(options =>
     {
-        options.SignIn.RequireConfirmedAccount = false;
-        options.User.RequireUniqueEmail = true;
-        options.Password.RequireDigit = false;
-        options.Password.RequiredLength = 6;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireLowercase = false;
+        //options.SignIn.RequireConfirmedAccount = false;
+        //options.User.RequireUniqueEmail = true;
+        //options.Password.RequireDigit = false;
+        //options.Password.RequiredLength = 6;
+        //options.Password.RequireNonAlphanumeric = false;
+        //options.Password.RequireUppercase = false;
+        //options.Password.RequireLowercase = false;
     })
-    .AddEntityFrameworkStores<LibraryContext>();
+    .AddEntityFrameworkStores<LibraryContext>().AddDefaultTokenProviders();
 
 
 builder.Services.AddDbContext<LibraryContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<TokenService, TokenService>();
 
 var app = builder.Build();
 
