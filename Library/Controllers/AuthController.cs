@@ -53,12 +53,6 @@ namespace Library.Controllers
             var userInDb = _context.Users.FirstOrDefault(u => u.Email == request.Email);
             if (userInDb is null) return BadRequest("Kullanıcıya ulaşılamadı");
 
-            //var managedUser = await _userManager.FindByEmailAsync(request.Email);
-            //if (managedUser == null)
-            //{
-            //    return BadRequest("Bad credentials");
-            //}
-            //string passwordHashh = BCrypt.Net.BCrypt.HashPassword(userInDb.Password);
             userDto.Id=userInDb.Id;
             userDto.Name = userInDb.Name;
             userDto.LastName = userInDb.LastName;
@@ -70,12 +64,6 @@ namespace Library.Controllers
             {
                 return BadRequest("Wrong password.");
             }
-            //var isPasswordValid = await _userManager.CheckPasswordAsync(managedUser, request.Password);
-            //if (!isPasswordValid)
-            //{
-            //    return BadRequest("Bad credentials");
-            //}
-
 
             var accessToken = CreateToken(userDto);
             await _context.SaveChangesAsync();

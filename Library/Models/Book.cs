@@ -6,8 +6,8 @@
         public string Name { get; set; }
         public int Author { get; set; }
         public string Publishing { get; set; }
-        public int Basım { get; set; }
         public int Category { get; set; }
+        public string? Summary { get; set; }
         public byte[]? Image { get; set; }
     }
 }
