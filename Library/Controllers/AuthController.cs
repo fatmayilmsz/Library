@@ -30,6 +30,12 @@ namespace Library.Controllers
 
             if (!ModelState.IsValid)
                 return BadRequest("Invalid data.");
+            userDto.Id = request.Id;
+            userDto.Name = request.Name;
+            userDto.LastName = request.LastName;
+            userDto.Email = request.Email;
+            userDto.PasswordHash = passwordHash;
+            userDto.Role = request.Role;
 
             _context.Users.Add(new User()
             {
@@ -40,7 +46,17 @@ namespace Library.Controllers
                 Role= request.Role,
             });
             _context.SaveChanges();
-            return Ok();
+            var accessToken = CreateToken(userDto);
+            return Ok(new AuthResponse
+            {
+                Name = request.Name,
+                LastName = request.LastName,
+                Email = request.Email,
+                PasswordHash = userDto.PasswordHash,
+                Role = userDto.Role,
+                Token = (string)accessToken,
+            });
+            ;
         }
 
         [HttpPost("login")]
