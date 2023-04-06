@@ -15,7 +15,7 @@
           "Microsoft.EntityFrameworkCore.Design": "7.0.3",
           "Microsoft.EntityFrameworkCore.SqlServer": "7.0.3",
           "Microsoft.EntityFrameworkCore.Tools": "7.0.3",
-          "Npgsql.EntityFrameworkCore.PostgreSQL": "6.0.7",
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "7.0.3",
           "SixLabors.ImageSharp": "3.0.1",
           "Swashbuckle.AspNetCore": "6.4.0",
           "Swashbuckle.AspNetCore.Filters": "7.0.6",
@@ -470,28 +470,28 @@
           }
         }
       },
-      "Npgsql/6.0.7": {
+      "Npgsql/7.0.2": {
         "dependencies": {
-          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+          "Microsoft.Extensions.Logging.Abstractions": "7.0.0"
         },
         "runtime": {
-          "lib/net6.0/Npgsql.dll": {
-            "assemblyVersion": "6.0.7.0",
-            "fileVersion": "6.0.7.0"
+          "lib/net7.0/Npgsql.dll": {
+            "assemblyVersion": "7.0.2.0",
+            "fileVersion": "7.0.2.0"
           }
         }
       },
-      "Npgsql.EntityFrameworkCore.PostgreSQL/6.0.7": {
+      "Npgsql.EntityFrameworkCore.PostgreSQL/7.0.3": {
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "7.0.3",
           "Microsoft.EntityFrameworkCore.Abstractions": "7.0.3",
           "Microsoft.EntityFrameworkCore.Relational": "7.0.3",
-          "Npgsql": "6.0.7"
+          "Npgsql": "7.0.2"
         },
         "runtime": {
-          "lib/net6.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll": {
-            "assemblyVersion": "6.0.7.0",
-            "fileVersion": "6.0.7.0"
+          "lib/net7.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll": {
+            "assemblyVersion": "7.0.3.0",
+            "fileVersion": "7.0.3.0"
           }
         }
       },
@@ -716,7 +716,6 @@
           }
         }
       },
-      "System.Runtime.CompilerServices.Unsafe/6.0.0": {},
       "System.Security.AccessControl/5.0.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "5.0.0",
@@ -1146,19 +1145,19 @@
       "path": "mono.texttemplating/2.2.1",
       "hashPath": "mono.texttemplating.2.2.1.nupkg.sha512"
     },
-    "Npgsql/6.0.7": {
+    "Npgsql/7.0.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-HhD5q/VUJY++tCzc0eCrhtsxmUdP7NxNhUMOdYW6sqpC6NRlFLvUDf5JyRj0gOGkXe3Tn49toaisgvLqlzQ2JQ==",
-      "path": "npgsql/6.0.7",
-      "hashPath": "npgsql.6.0.7.nupkg.sha512"
+      "sha512": "sha512-/k12hfmg4PI0IU2UTLN6n0s/FKUfox8+RdWtzgADYZoyks7GH82WLyXm27eeqatsi/nmiK9lO3HyULlTD87szg==",
+      "path": "npgsql/7.0.2",
+      "hashPath": "npgsql.7.0.2.nupkg.sha512"
     },
-    "Npgsql.EntityFrameworkCore.PostgreSQL/6.0.7": {
+    "Npgsql.EntityFrameworkCore.PostgreSQL/7.0.3": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-kqwX2V9Znw/QjLDL6SyYEHiy9toMuqMTyCJ4ebQu65FpV8pElYKpOlBbxoyr6YNgqieXEMmpnE0TIoTKsVdeLw==",
-      "path": "npgsql.entityframeworkcore.postgresql/6.0.7",
-      "hashPath": "npgsql.entityframeworkcore.postgresql.6.0.7.nupkg.sha512"
+      "sha512": "sha512-3iVz7vcPAZt6iBSjJ8XyjtIP19jilNOJqTiTCs2UHWhpTyP+FbNhnzCBE/oyD3n49McmmenjKpva+yTy7q1z/g==",
+      "path": "npgsql.entityframeworkcore.postgresql/7.0.3",
+      "hashPath": "npgsql.entityframeworkcore.postgresql.7.0.3.nupkg.sha512"
     },
     "Scrutor/3.3.0": {
       "type": "package",
@@ -1334,13 +1333,6 @@
       "sha512": "sha512-30D6MkO8WF9jVGWZIP0hmCN8l9BTY4LCsAzLIe4xFSXzs+AjDotR7DpSmj27pFskDURzUvqYYY0ikModgBTxWw==",
       "path": "system.runtime.caching/5.0.0",
       "hashPath": "system.runtime.caching.5.0.0.nupkg.sha512"
-    },
-    "System.Runtime.CompilerServices.Unsafe/6.0.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg==",
-      "path": "system.runtime.compilerservices.unsafe/6.0.0",
-      "hashPath": "system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
     },
     "System.Security.AccessControl/5.0.0": {
       "type": "package",

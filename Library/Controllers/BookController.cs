@@ -92,7 +92,7 @@ namespace Library.Controllers
             {
                 if (book.Image != null)
                 {
-                    using (System.IO.MemoryStream ms = new MemoryStream(book.Image))
+                    using (System.IO.MemoryStream ms = new MemoryStream(book.Image)) //Görselin kalitesi düşürülür
                     {
                         using (SixLabors.ImageSharp.Image image = Image.Load(ms))
                         {
