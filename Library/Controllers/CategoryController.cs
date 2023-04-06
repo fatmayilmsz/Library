@@ -1,5 +1,6 @@
 ﻿using Library.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Library.Controllers
 {
@@ -12,11 +13,11 @@ namespace Library.Controllers
         {
             _context = librarycontext;
         }
+
         [HttpGet]
-        public IActionResult FindCategories()
+        public async Task<IActionResult> FindCategories()
         {
-            var categories = _context.Categories.ToList();
-            return Ok(categories);
+            return Ok(await _context.Categories.ToListAsync());
         }
     }
 }

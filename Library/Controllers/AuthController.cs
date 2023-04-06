@@ -23,75 +23,81 @@ namespace Library.Controllers
             _context = context;
             _configuration = configuration;
         }
+
         [HttpPost("register")]
-        public IActionResult Post([FromBody] User request)
+        public async Task<IActionResult> Post([FromBody] User request)
         {
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-
-            if (!ModelState.IsValid)
-                return BadRequest("Invalid data.");
-            userDto.Id = request.Id;
-            userDto.Name = request.Name;
-            userDto.LastName = request.LastName;
-            userDto.Email = request.Email;
-            userDto.PasswordHash = passwordHash;
-            userDto.Role = request.Role;
-
-            _context.Users.Add(new User()
+            if (ModelState.IsValid)
             {
-                Name = request.Name,
-                LastName = request.LastName,
-                Email = request.Email,
-                Password = passwordHash,
-                Role= request.Role,
-            });
-            _context.SaveChanges();
-            var accessToken = CreateToken(userDto);
-            return Ok(new AuthResponse
-            {
-                Name = request.Name,
-                LastName = request.LastName,
-                Email = request.Email,
-                PasswordHash = userDto.PasswordHash,
-                Role = userDto.Role,
-                Token = (string)accessToken,
-            });
-            ;
+                userDto.Id = request.Id;
+                userDto.Name = char.ToUpper(request.Name.Trim().ToLower()[0]) + request.Name.Trim().ToLower().Substring(1);
+                userDto.LastName = char.ToUpper(request.LastName.Trim().ToLower()[0]) + request.LastName.Trim().ToLower().Substring(1);
+                userDto.Email = request.Email.Trim();
+                userDto.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password.Trim());
+                userDto.Role = request.Role;
+
+                _context.Users.Add(new User()
+                {
+                    Name = userDto.Name,
+                    LastName = userDto.LastName,
+                    Email = userDto.Email,
+                    Password = userDto.PasswordHash,
+                    Role = userDto.Role,
+                });
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new AuthResponse
+                {
+                    Name = userDto.Name,
+                    LastName = userDto.LastName,
+                    Email = userDto.Email,
+                    PasswordHash = userDto.PasswordHash,
+                    Role = userDto.Role,
+                    Token = (string)CreateToken(userDto),
+                });
+            }
+            return BadRequest("Invalid data.");
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponse>> Authenticate([FromBody] AuthRequest request)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return BadRequest(ModelState);
-            }
-            var userInDb = _context.Users.FirstOrDefault(u => u.Email == request.Email);
-            if (userInDb is null) return BadRequest("Kullanıcıya ulaşılamadı");
+                Library.Models.User userInDb;
+                try
+                {
+                    userInDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email.Trim());
+                }
+                catch (Exception)
+                {
+                    return BadRequest("Kullanıcıya ulaşılamadı");
+                }
 
-            userDto.Id=userInDb.Id;
-            userDto.Name = userInDb.Name;
-            userDto.LastName = userInDb.LastName;
-            userDto.Email = userInDb.Email;
-            userDto.PasswordHash = userInDb.Password;
-            userDto.Role = userInDb.Role;
+                if (BCrypt.Net.BCrypt.Verify(request.Password, userInDb.Password))
+                {
+                    userDto.Id = userInDb.Id;
+                    userDto.Name = userInDb.Name;
+                    userDto.LastName = userInDb.LastName;
+                    userDto.Email = userInDb.Email;
+                    userDto.PasswordHash = userInDb.Password;
+                    userDto.Role = userInDb.Role;
 
-            if (!BCrypt.Net.BCrypt.Verify(request.Password, userDto.PasswordHash))
-            {
+                    await _context.SaveChangesAsync();
+                    return Ok(new AuthResponse
+                    {
+                        Name = userDto.Name,
+                        LastName = userDto.LastName,
+                        Email = userDto.Email,
+                        PasswordHash = userDto.PasswordHash,
+                        Role = userDto.Role,
+                        Token = (string)CreateToken(userDto),
+                    });
+                }
                 return BadRequest("Wrong password.");
             }
-
-            var accessToken = CreateToken(userDto);
-            await _context.SaveChangesAsync();
-            return Ok(new AuthResponse
-            {
-                Name = userInDb.Name,
-                LastName = userInDb.LastName,
-                Email = userInDb.Email,
-                PasswordHash = userDto.PasswordHash, 
-                Role= userDto.Role,
-                Token = (string)accessToken,
-            });
+            return BadRequest(ModelState);
         }
         private string CreateToken(UserDto user)
         {
@@ -99,32 +105,28 @@ namespace Library.Controllers
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name,user.Name),
-
             };
 
-            if (user.Role == 1)
+            switch (user.Role)
             {
-                claims.Add(new Claim(ClaimTypes.Role, "User")); 
-            }
-            else if(user.Role == 2)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
-            }
-            else if(user.Role == 3) 
-            {
-                claims.Add(new Claim(ClaimTypes.Role, "SuperAdmin"));
+                case 1:
+                    claims.Add(new Claim(ClaimTypes.Role, "User"));
+                    break;
+                case 2:
+                    claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+                    break;
+                case 3:
+                    claims.Add(new Claim(ClaimTypes.Role, "SuperAdmin"));
+                    break;
             }
 
-      
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-            var token = new JwtSecurityToken(
+            System.IdentityModel.Tokens.Jwt.JwtSecurityToken token = new JwtSecurityToken(
                 claims: claims,
                 expires: DateTime.Now.AddDays(1),
-                signingCredentials: creds
+                signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value!)), SecurityAlgorithms.HmacSha512Signature)
                 );
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            return jwt;
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
 

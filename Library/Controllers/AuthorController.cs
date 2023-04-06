@@ -1,5 +1,6 @@
 ﻿using Library.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Library.Controllers
 {
@@ -12,11 +13,11 @@ namespace Library.Controllers
         {
             _context = librarycontext;
         }
+
         [HttpGet]
-        public IActionResult FindAuthors()
+        public async Task<IActionResult> FindAuthors()
         {
-            var authors = _context.Authors.ToList();
-            return Ok(authors);
+            return Ok(await _context.Authors.ToListAsync());
         }
     }
 }

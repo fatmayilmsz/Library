@@ -1,6 +1,10 @@
 ﻿using Library.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using Microsoft.EntityFrameworkCore;
 
 namespace Library.Controllers
 {
@@ -15,20 +19,18 @@ namespace Library.Controllers
         }
 
         [HttpGet]
-        public IActionResult FindBooks()
+        public async Task<IActionResult> FindBooks()
         {
-            var books = _context.Books.ToList();
-            return Ok(books);
+            return Ok(await _context.Books.ToListAsync());
         }
 
         [HttpGet]
         [Route("/{category}/{id}")]
-        public IActionResult GetBook(UInt32 category, UInt32 id)
+        public async Task<IActionResult> GetBook(UInt32 category, UInt32 id)
         {
             try
             {
-                Book book = _context.Books.Where(x => x.CategoryId == category && x.Id == id).First();
-                return Ok(book);
+                return Ok(await _context.Books.Where(x => x.CategoryId == category && x.Id == id).FirstAsync());
             }
             catch (Exception)
             {
@@ -36,13 +38,29 @@ namespace Library.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("/update")]
-        public IActionResult UpdateBook(Book book)
+        [HttpDelete]
+        [Route("/delete/{category}/{id}")]
+        public async Task<IActionResult> DeleteBook(UInt32 category, UInt32 id)
         {
             try
             {
-                Book bookdb = _context.Books.Where(x => x.CategoryId == book.CategoryId && x.Id == book.Id).First();
+                _context.Remove(await _context.Books.Where(x => x.CategoryId == category && x.Id == id).FirstAsync());
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPut]
+        [Route("/update")]
+        public async Task<IActionResult> UpdateBook(Book book)
+        {
+            try
+            {
+                Book bookdb = await _context.Books.Where(x => x.CategoryId == book.CategoryId && x.Id == book.Id).FirstAsync();
 
                 foreach (PropertyInfo prop in book.GetType().GetProperties())
                 {
@@ -57,7 +75,7 @@ namespace Library.Controllers
                 }
 
                 _context.Books.Update(bookdb);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
                 return Ok();
             }
@@ -68,23 +86,42 @@ namespace Library.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateBook(Book book)
+        public async Task<IActionResult> CreateBook(Book book)
         {
-            if (book == null)
+            if (book != null)
             {
-                return BadRequest("Invalid data");
-            }
-            _context.Books.Add(new Book()
-            {
-                Name = book.Name,
-                Author= book.Author,
-                Publishing = book.Publishing,
-                Category= book.Category,
-                Summary= book.Summary,
+                if (book.Image != null)
+                {
+                    using (System.IO.MemoryStream ms = new MemoryStream(book.Image))
+                    {
+                        using (SixLabors.ImageSharp.Image image = Image.Load(ms))
+                        {
+                            image.Mutate(x => x.Resize(new ResizeOptions
+                            {
+                                Size = new Size(210, 150),
+                                Mode = ResizeMode.Max,
+                                Compand = true
+                            }));
+                            ms.SetLength(0);
+                            await image.SaveAsync(ms, new JpegEncoder { Quality = 80 });
+                            book.Image = ms.ToArray();
+                        }
+                    }
+                }
 
-            });
-            _context.SaveChanges();
-            return Ok();
+                await _context.Books.AddAsync(new Book()
+                {
+                    Name = book.Name,
+                    Author = book.Author,
+                    Publishing = book.Publishing,
+                    Category = book.Category,
+                    Summary = book.Summary,
+                    Image = book.Image,
+                });
+                await _context.SaveChangesAsync();
+                return Accepted();
+            }
+            return BadRequest("Invalid data");
         }
     }
 }
