@@ -10,7 +10,7 @@
         public int CategoryId { get; set; }
         public string Category { get; set; }
         public string? Summary { get; set; }
-        public int ReadCount { get; set; }
+        public int? ReadCount { get; set; }
         public byte[]? Image { get; set; }
     }
 }
