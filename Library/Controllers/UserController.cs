@@ -1,7 +1,8 @@
 ﻿using Library.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Library.Controllers
 {
@@ -15,14 +16,16 @@ namespace Library.Controllers
             _context = librarycontext;
         }
 
-        [HttpGet,Authorize(Roles = "SuperAdmin")]
-        public IActionResult FindUsers()
+        [HttpGet, Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> FindUsers()
         {
-            var users = _context.Users.ToList();
-            return Ok(users);
+            return Ok(await _context.Users.ToListAsync());
         }
-       
 
-
+        [HttpGet, Route("/")]
+        public async Task<IActionResult> GetFavs()
+        {
+            return Ok(await _context.Users.ToListAsync());
+        }
     }
 }
