@@ -116,9 +116,8 @@ C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Microso
 C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Microsoft.SqlServer.Server.dll
 C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Microsoft.Win32.SystemEvents.dll
 C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Mono.TextTemplating.dll
-C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Npgsql.dll
-C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Scrutor.dll
+C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\SixLabors.ImageSharp.dll
 C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Swashbuckle.AspNetCore.Filters.dll
 C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Swashbuckle.AspNetCore.Filters.Abstractions.dll
 C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\Swashbuckle.AspNetCore.Swagger.dll
@@ -166,4 +165,3 @@ C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\obj\Debug\net7.0\refint\
 C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\obj\Debug\net7.0\Library.pdb
 C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\obj\Debug\net7.0\Library.genruntimeconfig.cache
 C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\obj\Debug\net7.0\ref\Library.dll
-C:\Users\Otlar\OneDrive\Belgeler\GitHub\Library\Library\bin\Debug\net7.0\SixLabors.ImageSharp.dll
