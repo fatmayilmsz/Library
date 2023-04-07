@@ -2,12 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
+using System.Reflection;
 
 namespace Library.Controllers
 {
     [ApiController]
-    [Route("users")]
     public class UserController : ControllerBase
     {
         private readonly LibraryContext _context;
@@ -16,16 +15,72 @@ namespace Library.Controllers
             _context = librarycontext;
         }
 
-        [HttpGet, Authorize(Roles = "SuperAdmin")]
+        [HttpGet, Route("users"), Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> FindUsers()
         {
             return Ok(await _context.Users.ToListAsync());
         }
 
-        [HttpGet, Route("/")]
-        public async Task<IActionResult> GetFavs()
+        [HttpDelete, Route("users/delete/{id}"), Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> DeleteUser(UInt32 id)
         {
-            return Ok(await _context.Users.ToListAsync());
+            try
+            {
+                _context.Users.Remove(await _context.Users.Where(x => x.Id == id).FirstAsync());
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception)
+            {
+
+                return NotFound();
+            }
+        }
+
+        [HttpPost, Route("users/add"), Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> AddUser(User user)
+        {
+            try
+            {
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception)
+            {
+
+                return BadRequest();
+            }
+        }
+
+        [HttpPut, Route("users/update"), Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> UpdateUser(User user)
+        {
+            try
+            {
+                User userdb = await _context.Users.Where(x => x.Id == user.Id).FirstAsync();
+
+                foreach (PropertyInfo prop in user.GetType().GetProperties())
+                {
+                    var propVal = prop.GetValue(user);
+                    if (propVal != null && !propVal.Equals("") && !propVal.Equals(0))
+                    {
+                        if (userdb.GetType().GetProperty(prop.Name) != null)
+                        {
+                            userdb.GetType().GetProperty(prop.Name).SetValue(userdb, propVal);
+                        }
+                    }
+                }
+                _context.Users.Update(userdb);
+                await _context.SaveChangesAsync();
+
+                return Ok();
+            }
+            catch (Exception)
+            {
+
+                return NotFound();
+            }
         }
     }
 }
