@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Library.Controllers
 {
     [ApiController]
-    [Route("books")]
     public class BookController : ControllerBase
     {
         private readonly LibraryContext _context;
@@ -18,14 +17,13 @@ namespace Library.Controllers
             _context = librarycontext;
         }
 
-        [HttpGet]
+        [HttpGet, Route("books")]
         public async Task<IActionResult> FindBooks()
         {
             return Ok(await _context.Books.ToListAsync());
         }
 
-        [HttpGet]
-        [Route("/{category}/{id}")]
+        [HttpGet, Route("books/{category}/{id}")]
         public async Task<IActionResult> GetBook(UInt32 category, UInt32 id)
         {
             try
@@ -38,8 +36,7 @@ namespace Library.Controllers
             }
         }
 
-        [HttpDelete]
-        [Route("/delete/{category}/{id}")]
+        [HttpDelete, Route("books/delete/{category}/{id}")]
         public async Task<IActionResult> DeleteBook(UInt32 category, UInt32 id)
         {
             try
@@ -54,8 +51,7 @@ namespace Library.Controllers
             }
         }
 
-        [HttpPut]
-        [Route("/update")]
+        [HttpPut, Route("books/update")]
         public async Task<IActionResult> UpdateBook(Book book)
         {
             try
@@ -79,13 +75,13 @@ namespace Library.Controllers
 
                 return Ok();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                return NotFound(e);
+                return NotFound();
             }
         }
 
-        [HttpPost]
+        [HttpPost, Route("books/add")]
         public async Task<IActionResult> CreateBook(Book book)
         {
             if (book != null)
