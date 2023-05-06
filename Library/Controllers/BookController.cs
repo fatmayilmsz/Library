@@ -94,7 +94,7 @@ namespace Library.Controllers
                         {
                             image.Mutate(x => x.Resize(new ResizeOptions
                             {
-                                Size = new Size(210, 150),
+                                Size = new Size(150, 210),
                                 Mode = ResizeMode.Max,
                                 Compand = true
                             }));

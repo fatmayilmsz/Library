@@ -14,7 +14,7 @@ namespace Library.Models
         public DbSet<Category> Categories { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserDto> UserDtos { get; set; }
-
+        public DbSet<Address> Address { get; set; }
         public DbSet<Author> Authors { get; set; }
 
       
