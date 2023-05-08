@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 namespace Library.Models
 {
@@ -16,8 +14,7 @@ namespace Library.Models
         public DbSet<UserDto> UserDtos { get; set; }
         public DbSet<Address> Address { get; set; }
         public DbSet<Author> Authors { get; set; }
-
-      
+        public DbSet<Publisher> Publishers { get; set; }
     }
   
 
