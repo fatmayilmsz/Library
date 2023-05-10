@@ -2,9 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\Library",
-    "\\Library\\obj\\Debug",
-    "\\Library\\obj\\Release"
+    "\\Library\\Controllers"
   ],
-  "SelectedNode": "\\Library.sln",
+  "SelectedNode": "\\Library\\Controllers\\AddressController.cs",
   "PreviewInSolutionExplorer": false
 }
