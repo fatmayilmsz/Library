@@ -34,7 +34,7 @@ namespace Library.Controllers
                 userDto.LastName = char.ToUpper(request.LastName.Trim().ToLower()[0]) + request.LastName.Trim().ToLower().Substring(1);
                 userDto.Email = request.Email.Trim();
                 userDto.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password.Trim());
-                userDto.Role = request.Role;
+                userDto.Phone = request.Phone;
 
                 _context.Users.Add(new User()
                 {
@@ -42,7 +42,8 @@ namespace Library.Controllers
                     LastName = userDto.LastName,
                     Email = userDto.Email,
                     Password = userDto.PasswordHash,
-                    Role = userDto.Role,
+                    Role = 1,
+                    Phone= userDto.Phone
                 });
 
                 await _context.SaveChangesAsync();
@@ -53,7 +54,8 @@ namespace Library.Controllers
                     LastName = userDto.LastName,
                     Email = userDto.Email,
                     PasswordHash = userDto.PasswordHash,
-                    Role = userDto.Role,
+                    Role = 1,
+                    Phone = userDto.Phone,
                     Token = (string)CreateToken(userDto),
                 });
             }
