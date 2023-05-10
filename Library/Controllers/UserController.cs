@@ -15,7 +15,7 @@ namespace Library.Controllers
             _context = librarycontext;
         }
 
-        [HttpGet, Route("users"), Authorize(Roles = "SuperAdmin")]
+        [HttpGet, Route("users")]
         public async Task<IActionResult> FindUsers()
         {
             return Ok(await _context.Users.ToListAsync());
@@ -53,7 +53,7 @@ namespace Library.Controllers
             }
         }
 
-        [HttpPut, Route("users/update"), Authorize(Roles = "SuperAdmin")]
+        [HttpPut, Route("users/update")]
         public async Task<IActionResult> UpdateUser(User user)
         {
             try
