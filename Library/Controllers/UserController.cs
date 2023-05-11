@@ -18,7 +18,7 @@ namespace Library.Controllers
         [HttpGet, Route("users"), Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> FindUsers()
         {
-            return Ok(await _context.Users.ToListAsync());
+            return Ok(await _context.Users.AsNoTracking().ToArrayAsync());
         }
 
         [HttpDelete, Route("users/delete/{id}"), Authorize(Roles = "SuperAdmin")]
@@ -26,7 +26,7 @@ namespace Library.Controllers
         {
             try
             {
-                _context.Users.Remove(await _context.Users.Where(x => x.Id == id).FirstAsync());
+                _context.Users.Remove(await _context.Users.Where(u => u.Id == id).FirstAsync());
                 await _context.SaveChangesAsync();
                 return Ok();
             }
@@ -58,7 +58,7 @@ namespace Library.Controllers
         {
             try
             {
-                User userdb = await _context.Users.Where(x => x.Id == user.Id).FirstAsync();
+                User userdb = await _context.Users.Where(u => u.Id == user.Id).FirstAsync();
 
                 foreach (PropertyInfo prop in user.GetType().GetProperties())
                 {

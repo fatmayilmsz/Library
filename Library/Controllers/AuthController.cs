@@ -34,7 +34,7 @@ namespace Library.Controllers
                 userDto.LastName = char.ToUpper(request.LastName.Trim().ToLower()[0]) + request.LastName.Trim().ToLower().Substring(1);
                 userDto.Email = request.Email.Trim();
                 userDto.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password.Trim());
-                userDto.Role = request.Role;
+                userDto.Role = _context.Roles.Single(r => r.Name == "user").Id;
 
                 _context.Users.Add(new User()
                 {
@@ -101,8 +101,7 @@ namespace Library.Controllers
         }
         private string CreateToken(UserDto user)
         {
-
-            List<Claim> claims = new List<Claim>
+            List<Claim> claims = new List<Claim> // Burada neden List var? Array olursa daha iyi olmaz mı? ya da tupple(?)
             {
                 new Claim(ClaimTypes.Name,user.Name),
             };

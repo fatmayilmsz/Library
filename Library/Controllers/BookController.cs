@@ -16,60 +16,109 @@ namespace Library.Controllers
             _context = librarycontext;
         }
 
+        [HttpPost, Route("books/add")]
+        public async Task<IActionResult> AddBook(Book book)
+        {
+            //bool check = book.Authors?.Count != 0 && book.Authors != null ? await _context.Authors.AnyAsync(a => book.Authors.Any(auth => auth == a)) : true;
+            if (book != null && !await _context.Books.Include(b => b.Authors)
+                .AnyAsync(b => b.Name == book.Name))
+            {
+                if (book.Image != null && book.Image.Length != 0)
+                {
+                    using (System.IO.MemoryStream ms = new MemoryStream(book.Image)) //Görselin kalitesi düşürülür
+                    {
+                        using (SixLabors.ImageSharp.Image image = Image.Load(ms))
+                        {
+                            image.Mutate(ipc => ipc.Resize(new ResizeOptions
+                            {
+                                Size = new Size(150, 210),
+                                Mode = ResizeMode.Max,
+                                Compand = true
+                            }));
+                            ms.SetLength(0);
+                            await image.SaveAsync(ms, new JpegEncoder { Quality = 80 });
+                            book.Image = ms.ToArray();
+                        }
+                    }
+                }
+
+                Author[] matchedAuthors = await _context.Authors
+                    .Where(a => book.Authors!
+                    .Select(author => author.Id)
+                        .Contains(a.Id))
+                    .ToArrayAsync();
+
+                Publisher[] matchedPublishers = await _context.Publishers
+                    .Where(p => book.Publishers!
+                    .Select(publisher => publisher.Id)
+                        .Contains(p.Id))
+                    .ToArrayAsync();
+
+                Category[] matchedCategories = await _context.Categories
+                    .Where(c => book.Categories!
+                    .Select(cat => cat.Id)
+                        .Contains(c.Id))
+                    .ToArrayAsync();
+
+                await _context.Books.AddAsync(new Book()
+                {
+                    Name = book.Name,
+                    Authors = matchedAuthors,
+                    Publishers = matchedPublishers,
+                    Categories = matchedCategories,
+                    Summary = book.Summary,
+                    Image = book.Image,
+                });
+
+                await _context.SaveChangesAsync();
+                return Accepted();
+            }
+            return BadRequest("Invalid data");
+        }
+
         [HttpGet, Route("books")]
         public async Task<IActionResult> FindBooks()
         {
             return Ok(await _context.Books.AsNoTracking()
-                .ToListAsync());
+                .ToArrayAsync());
         }
 
-        [HttpGet, Route("books/{category}/{id}")]
-        public async Task<IActionResult> GetBook(UInt32 category, UInt32 id)
+        [HttpGet, Route("books/{id}")]
+        public async Task<IActionResult> GetBook( UInt32 id)
         {
             try
             {
                 return Ok(await _context.Books
-                    .Include(x => x.Categories)
-                    .Include(x => x.Authors)
+                    .Include(b => b.Categories)
+                    .Include(b => b.Authors)
+                    .Include(b => b.Publishers)
                     .AsNoTracking()
-                    .Where(x => x.Categories.Any(y => y.Id == category) && x.Id == id)
-                    .Select(x => new
+                    .Where(b => b.Id == id)
+                    .Select(b => new
                     {
-                        x.Id,
-                        x.Name,
-                        x.Summary,
-                        x.Image,
-                        Categories = x.Categories.Select(x => new
+                        b.Id,
+                        b.Name,
+                        b.Summary,
+                        b.Image,
+                        Categories = b.Categories.Select(c => new
                         {
-                            x.Id,
-                            x.Name
+                            c.Id,
+                            c.Name
                         }),
-                        Authors = x.Authors.Select(x => new
+                        Authors = b.Authors.Select(a => new
                         {
-                            x.Id,
-                            x.Name,
-                            x.LastName,
-                            x.Image
+                            a.Id,
+                            a.Name,
+                            a.LastName,
+                            a.Image
+                        }),
+                        Publishers = b.Publishers.Select(p => new
+                        { 
+                            p.Id,
+                            p.Name
                         })
                     })
                     .FirstAsync());
-            }
-            catch (Exception)
-            {
-                return NotFound();
-            }
-        }
-
-        [HttpDelete, Route("books/delete/{category}/{id}")]
-        public async Task<IActionResult> DeleteBook(UInt32 category, UInt32 id)
-        {
-            try
-            {
-                _context.Remove(await _context.Books.Include(x => x.Categories)
-                    .Where(x => x.Categories.Any(y => y.Id == category) && x.Id == id)
-                    .FirstAsync());
-                await _context.SaveChangesAsync();
-                return Ok();
             }
             catch (Exception)
             {
@@ -83,7 +132,7 @@ namespace Library.Controllers
             try
             {
                 Book bookdb = await _context.Books
-                    .SingleAsync(x => x.Id == book.Id);
+                    .SingleAsync(b => b.Id == book.Id);
                 string msg = "";
 
                 foreach (PropertyInfo prop in book.GetType().GetProperties().ToArray())
@@ -93,7 +142,7 @@ namespace Library.Controllers
                         && (propVal as ICollection)?.Count != 0
                         && bookdb.GetType().GetProperty(prop.Name) != null)
                     {
-                        if (prop.Name == "Name" || prop.Name == "LastName" || prop.Name == "Image")
+                        if (prop.Name == "Name" || prop.Name == "Summary" || prop.Name == "Image")
                         {
                             bookdb.GetType()?.GetProperty(prop.Name)?.SetValue(bookdb, propVal);
                         }
@@ -104,10 +153,10 @@ namespace Library.Controllers
                                 case "Categories":
                                     if (book.Categories != null)
                                     {
-                                        List<Category> newCats = _context.Categories
+                                        Category[] newCats = await _context.Categories
                                             .Where(c => book.Categories!
-                                            .Select(cat => cat.Id).Contains(c.Id)).ToList();
-                                        if (newCats.Count != 0)
+                                            .Select(c => c.Id).Contains(c.Id)).ToArrayAsync();
+                                        if (newCats.Length != 0)
                                         {
                                             bookdb.Categories?.Clear();
                                             bookdb.Categories = newCats;
@@ -121,13 +170,13 @@ namespace Library.Controllers
                                 case "Authors":
                                     if (book.Authors != null)
                                     {
-                                        List<Author> newAuthors = _context.Authors
+                                        Author[] newAuthors = await _context.Authors
                                             .Where(
-                                                c => book.Authors!
-                                                .Select(cat => cat.Id)
-                                                .Contains(c.Id))
-                                            .ToList();
-                                        if (newAuthors.Count != 0)
+                                                a => book.Authors!
+                                                .Select(a => a.Id)
+                                                .Contains(a.Id))
+                                            .ToArrayAsync();
+                                        if (newAuthors.Length != 0)
                                         {
                                             bookdb.Authors?.Clear();
                                             bookdb.Authors = newAuthors;
@@ -141,13 +190,13 @@ namespace Library.Controllers
                                 case "Publishers":
                                     if (book.Publishers != null)
                                     {
-                                        List<Publisher> newPublishers = _context.Publishers
+                                        Publisher[] newPublishers = await _context.Publishers
                                             .Where(
-                                                c => book.Publishers!
-                                                .Select(cat => cat.Id)
-                                                .Contains(c.Id))
-                                            .ToList();
-                                        if (newPublishers.Count != 0)
+                                                p => book.Publishers!
+                                                .Select(p => p.Id)
+                                                .Contains(p.Id))
+                                            .ToArrayAsync();
+                                        if (newPublishers.Length != 0)
                                         {
                                             bookdb.Publishers?.Clear();
                                             bookdb.Publishers = newPublishers;
@@ -173,64 +222,28 @@ namespace Library.Controllers
             }
         }
 
-        [HttpPost, Route("books/add")]
-        public async Task<IActionResult> CreateBook(Book book)
+        [HttpDelete, Route("books/delete/{id}")]
+        public async Task<IActionResult> DeleteBook(UInt32 id)
         {
-            bool check = _context.Authors.Any(a => book.Authors.Any(author => author == a));
-            if (book != null && _context.Books.Include(b => b.Authors)
-                .Any(b => b.Name == book.Name && check))
+            try
             {
-                if (book.Image != null && book.Image.Length != 0)
-                {
-                    using (System.IO.MemoryStream ms = new MemoryStream(book.Image)) //Görselin kalitesi düşürülür
-                    {
-                        using (SixLabors.ImageSharp.Image image = Image.Load(ms))
-                        {
-                            image.Mutate(x => x.Resize(new ResizeOptions
-                            {
-                                Size = new Size(150, 210),
-                                Mode = ResizeMode.Max,
-                                Compand = true
-                            }));
-                            ms.SetLength(0);
-                            await image.SaveAsync(ms, new JpegEncoder { Quality = 80 });
-                            book.Image = ms.ToArray();
-                        }
-                    }
-                }
-
-                List<Author> matchedAuthors = await _context.Authors
-                    .Where(a => book.Authors!
-                    .Select(author => author.Id)
-                        .Contains(a.Id))
-                    .ToListAsync();
-
-                List<Publisher> matchedPublishers = await _context.Publishers
-                    .Where(p => book.Publishers!
-                    .Select(publisher => publisher.Id)
-                        .Contains(p.Id))
-                    .ToListAsync();
-
-                List<Category> matchedCategories = await _context.Categories
-                    .Where(c => book.Categories!
-                    .Select(cat => cat.Id)
-                        .Contains(c.Id))
-                    .ToListAsync();
-
-                await _context.Books.AddAsync(new Book()
-                {
-                    Name = book.Name,
-                    Authors = matchedAuthors,
-                    Publishers = matchedPublishers,
-                    Categories = matchedCategories,
-                    Summary = book.Summary,
-                    Image = book.Image,
-                });
-
+                Book tempBook = await _context.Books
+                    .Include(b => b.Categories)
+                    .Include(b => b.Authors)
+                    .Include(b => b.Publishers)
+                    .Where(b => b.Id == id)
+                    .FirstAsync();
+                tempBook.Categories.Clear();
+                tempBook.Authors.Clear();
+                tempBook.Publishers.Clear();
+                _context.Remove(tempBook);
                 await _context.SaveChangesAsync();
-                return Accepted();
+                return Ok();
             }
-            return BadRequest("Invalid data");
+            catch (Exception)
+            {
+                return NotFound();
+            }
         }
     }
 }

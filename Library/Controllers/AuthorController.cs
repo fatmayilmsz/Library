@@ -16,10 +16,22 @@ namespace Library.Controllers
             _context = librarycontext;
         }
 
+        [HttpPost, Route("authors/add")]
+        public async Task<IActionResult> AddAuthor(Author author)
+        {
+            if (!await _context.Authors.AnyAsync(a => a.Name == author.Name && a.LastName == author.LastName))
+            {
+                await _context.Authors.AddAsync(author);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            return BadRequest(new { message = "The author is already in database!" });
+        }
+
         [HttpGet, Route("authors")]
         public async Task<IActionResult> FindAuthors()
         {
-            return Ok(await _context.Authors.AsNoTracking().ToListAsync());
+            return Ok(await _context.Authors.AsNoTracking().ToArrayAsync());
         }
 
 
@@ -29,27 +41,27 @@ namespace Library.Controllers
             try
             {
                 return Ok(await _context.Authors
-                    .Include(x => x.Categories)
-                    .Include(x => x.Books)
+                    .Include(a => a.Categories)
+                    .Include(a => a.Books)
                     .AsNoTracking()
-                    .Where(x => x.Id == id)
-                    .Select(x => new
+                    .Where(a => a.Id == id)
+                    .Select(a => new
                     {
-                        x.Id,
-                        x.Name,
-                        x.LastName,
-                        x.Image,
-                        Categories = x.Categories.Select(x => new
+                        a.Id,
+                        a.Name,
+                        a.LastName,
+                        a.Image,
+                        Categories = a.Categories.Select(c => new
                         {
-                            x.Id,
-                            x.Name
+                            c.Id,
+                            c.Name
                         }),
-                        Books = x.Books.Select(x => new
+                        Books = a.Books.Select(b => new
                         {
-                            x.Id,
-                            x.Name,
-                            x.Summary,
-                            x.Image
+                            b.Id,
+                            b.Name,
+                            b.Summary,
+                            b.Image
                         })
                     })
                     .FirstAsync());
@@ -60,46 +72,13 @@ namespace Library.Controllers
             }
         }
 
-
-        [HttpDelete, Route("authors/delete/{id}")]
-        public async Task<IActionResult> DeleteAuthor(UInt32 id)
-        {
-            try
-            {
-                _context.Authors.Remove(await _context.Authors.Where(x => x.Id == id).FirstAsync());
-                await _context.SaveChangesAsync();
-                return Ok();
-            }
-            catch (Exception)
-            {
-
-                return NotFound();
-            }
-        }
-
-        [HttpPost, Route("authors/add")]
-        public async Task<IActionResult> AddAuthor(Author author)
-        {
-            try
-            {
-                await _context.Authors.AddAsync(author);
-                await _context.SaveChangesAsync();
-                return Ok();
-            }
-            catch (Exception)
-            {
-
-                return BadRequest();
-            }
-        }
-
         [HttpPut, Route("authors/update")]
         public async Task<IActionResult> UpdateAuthor(Author author)
         {
             try
             {
                 Author authordb = await _context.Authors.Include(a => a.Categories)
-                    .Include(a => a.Books).SingleAsync(x => x.Id == author.Id);
+                    .Include(a => a.Books).SingleAsync(a => a.Id == author.Id);
                 string msg = "";
 
                 foreach (PropertyInfo prop in author.GetType().GetProperties().ToArray())
@@ -120,10 +99,10 @@ namespace Library.Controllers
                                 case "Categories":
                                     if (author.Categories != null)
                                     {
-                                        List<Category> newCats = _context.Categories
+                                        Category[] newCats = await _context.Categories
                                             .Where(c => author.Categories!
-                                            .Select(cat => cat.Id).Contains(c.Id)).ToList();
-                                        if (newCats.Count != 0)
+                                            .Select(cat => cat.Id).Contains(c.Id)).ToArrayAsync();
+                                        if (newCats.Length != 0)
                                         {
                                             authordb.Categories?.Clear();
                                             authordb.Categories = newCats;
@@ -137,11 +116,11 @@ namespace Library.Controllers
                                 case "Books":
                                     if (author.Books != null)
                                     {
-                                        List<Book> newBooks = _context.Books
+                                        Book[] newBooks = await _context.Books
                                             .Where(c => author.Books!
                                             .Select(cat => cat.Id)
-                                            .Contains(c.Id)).ToList();
-                                        if (newBooks.Count != 0)
+                                            .Contains(c.Id)).ToArrayAsync();
+                                        if (newBooks.Length != 0)
                                         {
                                             authordb.Books?.Clear();
                                             authordb.Books = newBooks;
@@ -164,6 +143,28 @@ namespace Library.Controllers
             {
 
                 return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete, Route("authors/delete/{id}")]
+        public async Task<IActionResult> DeleteAuthor(UInt32 id)
+        {
+            try
+            {
+                Author tempAuthor = await _context.Authors
+                    .Include(a => a.Books)
+                    .Include(a => a.Categories)
+                    .Where(a => a.Id == id).FirstAsync();
+                tempAuthor.Categories.Clear();
+                tempAuthor.Books.Clear();
+                _context.Authors.Remove(tempAuthor);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception)
+            {
+
+                return NotFound();
             }
         }
     }
