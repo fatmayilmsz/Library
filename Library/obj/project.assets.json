@@ -4301,23 +4301,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\ygtle\\.nuget\\packages\\": {},
+    "C:\\Users\\Otlar\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\ygtle\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\Library.csproj",
+      "projectUniqueName": "C:\\Users\\Otlar\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\Library.csproj",
       "projectName": "Library",
-      "projectPath": "C:\\Users\\ygtle\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\Library.csproj",
-      "packagesPath": "C:\\Users\\ygtle\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ygtle\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\obj\\",
+      "projectPath": "C:\\Users\\Otlar\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\Library.csproj",
+      "packagesPath": "C:\\Users\\Otlar\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Otlar\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\ygtle\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Otlar\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -4412,16 +4412,8 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.101\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.202\\RuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "Undefined",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Problem reading the cache file C:\\Users\\ygtle\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\obj\\project.nuget.cache : Invalid property identifier character: <. Path 'version', line 3, position 0."
-    }
-  ]
+  }
 }

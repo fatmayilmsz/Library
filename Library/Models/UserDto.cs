@@ -7,7 +7,7 @@
         public string LastName { get; set; }
         public string Email { get; set; }
         public string PasswordHash { get; set; } = string.Empty;
-        public int Role { get; set; }
-
+        public byte Role { get; set; }
+        public bool Approved { get; set; }
     }
 }

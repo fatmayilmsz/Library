@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.Runtime.InteropServices;
-
-namespace Library.Models
+﻿namespace Library.Models
 {
     public class User 
     {
@@ -10,6 +7,8 @@ namespace Library.Models
         public string? LastName { get; set; }
         public string? Email { get; set; }
         public string? Password { get; set; }
-        public int Role { get; set; }
+        public byte Role { get; set; }
+        public ICollection<Book>? Books { get; set; }
+        public bool Approved { get; set; }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using Library.Models;
+using Library.utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 
@@ -16,25 +18,88 @@ namespace Library.Controllers
             _context = librarycontext;
         }
 
+        /// <summary>
+        /// Yazar ekler, eklenen yazar onaysızdır.
+        /// Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
+        /// boş liste halinde gönderilmelidir.
+        /// </summary>
         [HttpPost, Route("authors/add")]
-        public async Task<IActionResult> AddAuthor(Author author)
+        public async Task<IActionResult> AddAuthor([FromBody] Author author)
         {
-            if (!await _context.Authors.AnyAsync(a => a.Name == author.Name && a.LastName == author.LastName))
+            CustomResponseBody crb = new CustomResponseBody();
+            if (!await _context.Authors
+                .AnyAsync(a => a.Name + a.Lastname == author.Name + author.Lastname))
             {
-                await _context.Authors.AddAsync(author);
+
+                Category[] matchedCategories = await _context.Categories
+                    .Where(c => author.Categories!
+                    .Select(cat => cat.Id)
+                        .Contains(c.Id))
+                    .ToArrayAsync();
+
+                Book[] matchedBooks = await _context.Books
+                    .Where(b => author.Books!
+                    .Select(cat => cat.Id)
+                        .Contains(b.Id))
+                    .ToArrayAsync();
+
+                if (!matchedCategories.Any(c => author
+                    .Categories
+                    .Select(cat => cat.Id)
+                        .Contains(c.Id))
+                    ||
+                    !matchedBooks.Any(b => author
+                    .Categories
+                    .Select(book => book.Id)
+                        .Contains(b.Id))
+                    )
+                {
+                    crb.Warning += "Some/all specified categories or " +
+                        "books are not in db.";
+                }
+                else crb.Success += "All specified collections are assigned.";
+
+                await _context.Authors.AddAsync(new Author
+                {
+                    Name = author.Name,
+                    Lastname = author.Lastname,
+                    Image = author.Image,
+                    Categories = matchedCategories,
+                    Books = matchedBooks,
+                    Approved = false
+                });
+
+                crb.Success += "Author is added to collection.";
                 await _context.SaveChangesAsync();
-                return Ok();
+                crb.Success += "Changes are saved.";
+                return Ok(crb);
             }
-            return BadRequest(new { message = "The author is already in database!" });
+            crb.Error = "The author is already in database or one or more collections are null. Try to assign an empty list to collections.";
+            return BadRequest(crb);
         }
 
+        /// <summary>
+        /// Onaylı yazarları çeker, ayrıntılar yoktur.
+        /// </summary>
         [HttpGet, Route("authors")]
         public async Task<IActionResult> FindAuthors()
         {
-            return Ok(await _context.Authors.AsNoTracking().ToArrayAsync());
+            return Ok(await _context.Authors.AsNoTracking().Where(a => a.Approved).ToArrayAsync());
         }
 
+        /// <summary>
+        /// Onaysız yazarları çeker, ayrıntılar yoktur.
+        /// </summary>
+        [HttpGet, Route("authors/unapproved")]
+        public async Task<IActionResult> FindUnapprovedAuthors()
+        {
+            return Ok(await _context.Authors.AsNoTracking().Where(a => !a.Approved).ToArrayAsync());
+        }
 
+        /// <summary>
+        /// Onaylı bir yazarı çeker, tüm ayrıntıları vardır.
+        /// Yalnızca onaylı ayrıntıları çeker.
+        /// </summary>
         [HttpGet, Route("authors/{id}")]
         public async Task<IActionResult> GetAuthor(UInt32 id)
         {
@@ -44,42 +109,101 @@ namespace Library.Controllers
                     .Include(a => a.Categories)
                     .Include(a => a.Books)
                     .AsNoTracking()
-                    .Where(a => a.Id == id)
+                    .Where(a => a.Id == id && a.Approved)
                     .Select(a => new
                     {
                         a.Id,
                         a.Name,
-                        a.LastName,
+                        a.Lastname,
                         a.Image,
-                        Categories = a.Categories.Select(c => new
+                        a.Approved,
+                        Categories = a.Categories
+                        .Where(c => c.Approved)
+                        .Select(c => new
                         {
                             c.Id,
-                            c.Name
+                            c.Name,
+                            c.Approved
                         }),
-                        Books = a.Books.Select(b => new
+                        Books = a.Books
+                        .Where(b => b.Approved)
+                        .Select(b => new
                         {
                             b.Id,
                             b.Name,
                             b.Summary,
-                            b.Image
+                            b.Image,
+                            b.Approved
                         })
                     })
                     .FirstAsync());
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return NotFound();
+                return NotFound(new CustomResponseBody { Error = ex.Message});
             }
         }
 
-        [HttpPut, Route("authors/update")]
-        public async Task<IActionResult> UpdateAuthor(Author author)
+        /// <summary>
+        /// Onaysız bir yazarı çeker, tüm ayrıntıları vardır.
+        /// Onaylı ve onaysız ayrıntıları çeker.
+        /// </summary>
+        [HttpGet, Route("authors/unapproved/{id}")]
+        public async Task<IActionResult> GetUnapprovedAuthor(UInt32 id)
         {
+            try
+            {
+                return Ok(await _context.Authors
+                    .Include(a => a.Categories)
+                    .Include(a => a.Books)
+                    .AsNoTracking()
+                    .Where(a => a.Id == id && !a.Approved)
+                    .Select(a => new
+                    {
+                        a.Id,
+                        a.Name,
+                        a.Lastname,
+                        a.Image,
+                        a.Approved,
+                        Categories = a.Categories
+                        .Select(c => new
+                        {
+                            c.Id,
+                            c.Name,
+                            c.Approved
+                        }),
+                        Books = a.Books
+                        .Select(b => new
+                        {
+                            b.Id,
+                            b.Name,
+                            b.Summary,
+                            b.Image,
+                            b.Approved
+                        })
+                    })
+                    .FirstAsync());
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new CustomResponseBody { Error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Belirtilen "id"ye sahip kaydı
+        /// belirtilen property ve değeri neyse onu kayıt üzerinden günceller.
+        /// "Approved" property'si güncellenecek olsa da olmasa da belirtilmeli
+        /// ve istenen değer gönderilmelidir aksi halde sürekli "false" atanır.
+        /// </summary>
+        [HttpPut, Route("authors/update")]
+        public async Task<IActionResult> UpdateAuthor([FromBody] Author author)
+        {
+            CustomResponseBody crb = new CustomResponseBody();
             try
             {
                 Author authordb = await _context.Authors.Include(a => a.Categories)
                     .Include(a => a.Books).SingleAsync(a => a.Id == author.Id);
-                string msg = "";
 
                 foreach (PropertyInfo prop in author.GetType().GetProperties().ToArray())
                 {
@@ -88,7 +212,7 @@ namespace Library.Controllers
                         && !propVal.Equals(0) && (propVal as ICollection)?.Count != 0
                         && authordb.GetType().GetProperty(prop.Name) != null)
                     {
-                        if (prop.Name == "Name" || prop.Name == "LastName" || prop.Name == "Image")
+                        if (!LcUtils.GetDbSetTypes(_context).Any(dbSetType => dbSetType.Name == prop.Name))
                         {
                             authordb.GetType()?.GetProperty(prop.Name)?.SetValue(authordb, propVal);
                         }
@@ -109,7 +233,7 @@ namespace Library.Controllers
                                         }
                                         else
                                         {
-                                            msg += "Category Update Failed - No Category Matches\n";
+                                            crb.Warning += "Category Update Failed - No Category Matches\n";
                                         }
                                     }
                                     break;
@@ -127,7 +251,7 @@ namespace Library.Controllers
                                         }
                                         else
                                         {
-                                            msg += "Book Update Failed - No Book Matches\n";
+                                            crb.Warning += "Book Update Failed - No Book Matches\n";
                                         }
                                     }
                                     break;
@@ -136,19 +260,25 @@ namespace Library.Controllers
                     }
                 }
                 _context.Authors.Update(authordb);
+                crb.Success += "Record is updated.";
                 await _context.SaveChangesAsync();
-                return Ok(new { message = msg });
+                crb.Success += "Changes are saved.";
+                return Ok(crb);
             }
             catch (Exception ex)
             {
-
-                return NotFound(ex.Message);
+                crb.Error += ex.Message;
+                return NotFound(crb);
             }
         }
 
+        /// <summary>
+        /// Belirtilen yazar veritabanından silinir.
+        /// </summary>
         [HttpDelete, Route("authors/delete/{id}")]
         public async Task<IActionResult> DeleteAuthor(UInt32 id)
         {
+            CustomResponseBody crb = new CustomResponseBody();
             try
             {
                 Author tempAuthor = await _context.Authors
@@ -157,14 +287,17 @@ namespace Library.Controllers
                     .Where(a => a.Id == id).FirstAsync();
                 tempAuthor.Categories.Clear();
                 tempAuthor.Books.Clear();
+                crb.Success += "Assigned collection elements are deleted.";
                 _context.Authors.Remove(tempAuthor);
+                crb.Success += "Record is deleted.";
                 await _context.SaveChangesAsync();
-                return Ok();
+                crb.Success += "Changes are saved.";
+                return Ok(crb);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                return NotFound();
+                crb.Error += ex.Message;
+                return NotFound(crb);
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Reflection;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
+using Library.utils;
 
 namespace Library.Controllers
 {
@@ -16,9 +17,15 @@ namespace Library.Controllers
             _context = librarycontext;
         }
 
+        /// <summary>
+        /// Kitap ekler, eklenen kitap onaysızdır.
+        /// Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
+        /// boş liste halinde gönderilmelidir.
+        /// </summary>
         [HttpPost, Route("books/add")]
-        public async Task<IActionResult> AddBook(Book book)
+        public async Task<IActionResult> AddBook([FromBody] Book book)
         {
+            CustomResponseBody crb = new CustomResponseBody();
             //bool check = book.Authors?.Count != 0 && book.Authors != null ? await _context.Authors.AnyAsync(a => book.Authors.Any(auth => auth == a)) : true;
             if (book != null && !await _context.Books.Include(b => b.Authors)
                 .AnyAsync(b => b.Name == book.Name))
@@ -38,6 +45,7 @@ namespace Library.Controllers
                             ms.SetLength(0);
                             await image.SaveAsync(ms, new JpegEncoder { Quality = 80 });
                             book.Image = ms.ToArray();
+                            crb.Success += "Image successfuly resized.";
                         }
                     }
                 }
@@ -62,29 +70,50 @@ namespace Library.Controllers
 
                 await _context.Books.AddAsync(new Book()
                 {
-                    Name = book.Name,
-                    Authors = matchedAuthors,
-                    Publishers = matchedPublishers,
-                    Categories = matchedCategories,
-                    Summary = book.Summary,
-                    Image = book.Image,
+                    Name        =   book.Name,
+                    Authors     =   matchedAuthors,
+                    Publishers  =   matchedPublishers,
+                    Categories  =   matchedCategories,
+                    Summary     =   book.Summary,
+                    Image       =   book.Image,
+                    Approved    =   false
                 });
 
+                crb.Success += "Book is added to collection.";
                 await _context.SaveChangesAsync();
-                return Accepted();
+                crb.Success += "Changes are saved.";
+                return Accepted(crb);
             }
-            return BadRequest("Invalid data");
+            crb.Error += "The book already in db or one or more collections are null. Try to assign an empty list to collections.";
+            return BadRequest(crb);
         }
 
+        /// <summary>
+        /// Onaylı kitapları çeker, ayrıntılar yoktur.
+        /// </summary>
         [HttpGet, Route("books")]
         public async Task<IActionResult> FindBooks()
         {
             return Ok(await _context.Books.AsNoTracking()
-                .ToArrayAsync());
+                .Where(b => b.Approved).ToArrayAsync());
         }
 
+        /// <summary>
+        /// Onaysız kitapları çeker, ayrıntılar yoktur.
+        /// </summary>
+        [HttpGet, Route("books/unapproved")]
+        public async Task<IActionResult> FindUnapprovedBooks()
+        {
+            return Ok(await _context.Books.AsNoTracking()
+                .Where(b => !b.Approved).ToArrayAsync());
+        }
+
+        /// <summary>
+        /// Onaylı bir kitabı çeker, tüm ayrıntıları vardır.
+        /// Yalnızca onaylı ayrıntıları çeker.
+        /// </summary>
         [HttpGet, Route("books/{id}")]
-        public async Task<IActionResult> GetBook( UInt32 id)
+        public async Task<IActionResult> GetBook(UInt32 id)
         {
             try
             {
@@ -93,47 +122,117 @@ namespace Library.Controllers
                     .Include(b => b.Authors)
                     .Include(b => b.Publishers)
                     .AsNoTracking()
-                    .Where(b => b.Id == id)
+                    .Where(b => b.Id == id && b.Approved)
                     .Select(b => new
                     {
                         b.Id,
                         b.Name,
                         b.Summary,
                         b.Image,
-                        Categories = b.Categories.Select(c => new
+                        b.Approved,
+                        Categories = b.Categories
+                        .Where(c => c.Approved)
+                        .Select(c => new
                         {
                             c.Id,
-                            c.Name
+                            c.Name,
+                            c.Approved
                         }),
-                        Authors = b.Authors.Select(a => new
+                        Authors = b.Authors
+                        .Where(a => a.Approved)
+                        .Select(a => new
                         {
                             a.Id,
                             a.Name,
-                            a.LastName,
-                            a.Image
+                            a.Lastname,
+                            a.Image,
+                            a.Approved
                         }),
-                        Publishers = b.Publishers.Select(p => new
+                        Publishers = b.Publishers
+                        .Where(p => p.Approved)
+                        .Select(p => new
                         { 
                             p.Id,
-                            p.Name
+                            p.Name,
+                            p.Approved
                         })
                     })
                     .FirstAsync());
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return NotFound();
+                return NotFound(new CustomResponseBody { Error = ex.Message });
             }
         }
 
-        [HttpPut, Route("books/update")]
-        public async Task<IActionResult> UpdateBook(Book book)
+        /// <summary>
+        /// Onaysız bir kitabı çeker, tüm ayrıntıları vardır.
+        /// Onaylı ve onaysız ayrıntıları çeker.
+        /// </summary>
+        [HttpGet, Route("books/unapproved/{id}")]
+        public async Task<IActionResult> GetUnapprovedBook(UInt32 id)
         {
+            try
+            {
+                return Ok(await _context.Books
+                    .Include(b => b.Categories)
+                    .Include(b => b.Authors)
+                    .Include(b => b.Publishers)
+                    .AsNoTracking()
+                    .Where(b => b.Id == id && !b.Approved)
+                    .Select(b => new
+                    {
+                        b.Id,
+                        b.Name,
+                        b.Summary,
+                        b.Image,
+                        b.Approved,
+                        Categories = b.Categories
+                        .Select(c => new
+                        {
+                            c.Id,
+                            c.Name,
+                            c.Approved
+                        }),
+                        Authors = b.Authors
+                        .Select(a => new
+                        {
+                            a.Id,
+                            a.Name,
+                            a.Lastname,
+                            a.Image,
+                            a.Approved
+                        }),
+                        Publishers = b.Publishers
+                        .Select(p => new
+                        {
+                            p.Id,
+                            p.Name,
+                            p.Approved
+                        })
+                    })
+                    .FirstAsync());
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new CustomResponseBody { Error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Belirtilen "id"ye sahip kaydı
+        /// belirtilen property ve değeri neyse onu kayıt üzerinden günceller.
+        /// "Approved" property'si güncellenecek olsa da olmasa da belirtilmeli
+        /// ve istenen değer gönderilmelidir aksi halde sürekli "false" atanır.
+        /// </summary>
+        [HttpPut, Route("books/update")]
+        public async Task<IActionResult> UpdateBook([FromBody] Book book)
+        {
+            CustomResponseBody crb = new CustomResponseBody();
             try
             {
                 Book bookdb = await _context.Books
                     .SingleAsync(b => b.Id == book.Id);
-                string msg = "";
 
                 foreach (PropertyInfo prop in book.GetType().GetProperties().ToArray())
                 {
@@ -142,7 +241,7 @@ namespace Library.Controllers
                         && (propVal as ICollection)?.Count != 0
                         && bookdb.GetType().GetProperty(prop.Name) != null)
                     {
-                        if (prop.Name == "Name" || prop.Name == "Summary" || prop.Name == "Image")
+                        if (!LcUtils.GetDbSetTypes(_context).Any(dbSetType => dbSetType.Name == prop.Name))
                         {
                             bookdb.GetType()?.GetProperty(prop.Name)?.SetValue(bookdb, propVal);
                         }
@@ -163,7 +262,7 @@ namespace Library.Controllers
                                         }
                                         else
                                         {
-                                            msg += "Category Update Failed - No Category Matches\n";
+                                            crb.Warning += "Category Update Failed - No Category Matches.";
                                         }
                                     }
                                     break;
@@ -183,7 +282,7 @@ namespace Library.Controllers
                                         }
                                         else
                                         {
-                                            msg += "Author Update Failed - No Author Matches\n";
+                                            crb.Warning += "Author Update Failed - No Author Matches.";
                                         }
                                     }
                                     break;
@@ -203,7 +302,7 @@ namespace Library.Controllers
                                         }
                                         else
                                         {
-                                            msg += "Publisher Update Failed - No Publisher Matches\n";
+                                            crb.Warning += "Publisher Update Failed - No Publisher Matches.";
                                         }
                                     }
                                     break;
@@ -213,18 +312,25 @@ namespace Library.Controllers
                 }
 
                 _context.Books.Update(bookdb);
+                crb.Success += "Record is updated.";
                 await _context.SaveChangesAsync();
-                return Ok(new { message = msg });
+                crb.Success += "Changes are saved.";
+                return Ok(crb);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return NotFound();
+                crb.Error += ex.Message;
+                return NotFound(crb);
             }
         }
 
+        /// <summary>
+        /// Belirtilen kitap veritabanından silinir.
+        /// </summary>
         [HttpDelete, Route("books/delete/{id}")]
         public async Task<IActionResult> DeleteBook(UInt32 id)
         {
+            CustomResponseBody crb = new CustomResponseBody();
             try
             {
                 Book tempBook = await _context.Books
@@ -236,13 +342,17 @@ namespace Library.Controllers
                 tempBook.Categories.Clear();
                 tempBook.Authors.Clear();
                 tempBook.Publishers.Clear();
+                crb.Success += "Assigned collection elements are deleted.";
                 _context.Remove(tempBook);
+                crb.Success += "Record is deleted.";
                 await _context.SaveChangesAsync();
-                return Ok();
+                crb.Success += "Changes are saved.";
+                return Ok(crb);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return NotFound();
+                crb.Error += ex.Message;
+                return NotFound(crb);
             }
         }
     }

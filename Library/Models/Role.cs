@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace Library.Models
+﻿namespace Library.Models
 {
     public class Role
     {
-        public int Id { get; set; }
+        public byte Id { get; set; }
         public string Name { get; set; }
     }
 }
