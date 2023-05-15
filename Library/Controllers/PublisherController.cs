@@ -161,6 +161,7 @@ namespace Library.Controllers
             try
             {
                 Publisher publisherdb = await _context.Publishers
+                    .Include(p => p.Books)
                     .SingleAsync(p => p.Id == publisher.Id);
 
                 foreach (PropertyInfo prop in publisher.GetType().GetProperties().ToArray())
