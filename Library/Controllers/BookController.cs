@@ -228,10 +228,14 @@ namespace Library.Controllers
         [HttpPut, Route("books/update")]
         public async Task<IActionResult> UpdateBook([FromBody] Book book)
         {
+            // KATEGORİ ATAMA PROBLEMLİ
             CustomResponseBody crb = new CustomResponseBody();
             try
             {
                 Book bookdb = await _context.Books
+                    .Include(b => b.Categories)
+                    .Include(b => b.Authors)
+                    .Include(b => b.Users)
                     .SingleAsync(b => b.Id == book.Id);
 
                 foreach (PropertyInfo prop in book.GetType().GetProperties().ToArray())
