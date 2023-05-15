@@ -5,50 +5,28 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
-//builder.Services
-//    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters()
-//        {
-//            ClockSkew = TimeSpan.Zero,
-//            ValidateIssuer = true,
-//            ValidateAudience = true,
-//            ValidateLifetime = true,
-//            ValidateIssuerSigningKey = true,
-//            ValidIssuer = "apiWithAuthBackend",
-//            ValidAudience = "apiWithAuthBackend",
-//            IssuerSigningKey = new SymmetricSecurityKey(
-//                Encoding.UTF8.GetBytes("!SomethingSecret!")
-//            ),
-//        };
-//    });
-
-
-
-
+// Cors: Cross-Origin Resource Sharing ayarlarını yapılandırır.
 builder.Services.AddCors(options =>
 {
-    //Cors
-    options.AddPolicy(name: "default_cors",
-            policy =>
-            {
-                policy.AllowAnyOrigin()
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-            });
+    options.AddPolicy("default_cors", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
-// Add services to the container.
 
+// Add services to the container: Bağımlılıkları ve servisleri konteynere ekler.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Swagger: API dokümantasyonunu ve test arayüzünü sağlar.
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
@@ -58,7 +36,13 @@ builder.Services.AddSwaggerGen(options =>
         Type = SecuritySchemeType.ApiKey
     });
     options.OperationFilter<SecurityRequirementsOperationFilter>();
+    string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath);
+    //options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Library.xml"));
 });
+
+// Authentication and Authorization: Kimlik doğrulama ve yetkilendirme ayarlarını yapılandırır.
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -66,28 +50,28 @@ builder.Services
         options.TokenValidationParameters = new TokenValidationParameters()
         {
             ClockSkew = TimeSpan.Zero,
-            ValidateIssuer = false, //appsettings.jsonda tutulması daha sağlıklı olacaktır
-            ValidateAudience = false, //appsettings.jsonda tutulması daha sağlıklı olacaktır
+            ValidateIssuer = false, // appsettings.json'da tutulması daha sağlıklı olacaktır
+            ValidateAudience = false, // appsettings.json'da tutulması daha sağlıklı olacaktır
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value!))
-
         };
     });
+
 builder.Services
-    .AddIdentityCore<IdentityUser>(options =>
-    {
-    })
-    .AddEntityFrameworkStores<LibraryContext>().AddDefaultTokenProviders();
+    .AddIdentityCore<IdentityUser>()
+    .AddEntityFrameworkStores<LibraryContext>()
+    .AddDefaultTokenProviders();
 
-
-builder.Services.AddDbContext<LibraryContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Database: Veritabanı bağlantısını yapılandırır.
+builder.Services.AddDbContext<LibraryContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline: HTTP istekleri için gerekli ayarlamaları yapar.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -96,7 +80,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//Use Cors
+// Use Cors: Cross-Origin Resource Sharing ayarlarını etkinleştirir.
 app.UseCors("default_cors");
 
 app.UseAuthentication();

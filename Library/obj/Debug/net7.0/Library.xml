@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Library</name>
+    </assembly>
+    <members>
+        <member name="M:Library.Controllers.AuthorController.AddAuthor(Library.Models.Author)">
+            <summary>
+            Yazar ekler, eklenen yazar onaysızdır.
+            Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
+            boş liste halinde gönderilmelidir.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.AuthorController.FindAuthors">
+            <summary>
+            Onaylı yazarları çeker, ayrıntılar yoktur.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.AuthorController.FindUnapprovedAuthors">
+            <summary>
+            Onaysız yazarları çeker, ayrıntılar yoktur.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.AuthorController.GetAuthor(System.UInt32)">
+            <summary>
+            Onaylı bir yazarı çeker, tüm ayrıntıları vardır.
+            Yalnızca onaylı ayrıntıları çeker.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.AuthorController.GetUnapprovedAuthor(System.UInt32)">
+            <summary>
+            Onaysız bir yazarı çeker, tüm ayrıntıları vardır.
+            Onaylı ve onaysız ayrıntıları çeker.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.AuthorController.UpdateAuthor(Library.Models.Author)">
+            <summary>
+            Belirtilen "id"ye sahip kaydı
+            belirtilen property ve değeri neyse onu kayıt üzerinden günceller.
+            "Approved" property'si güncellenecek olsa da olmasa da belirtilmeli
+            ve istenen değer gönderilmelidir aksi halde sürekli "false" atanır.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.AuthorController.DeleteAuthor(System.UInt32)">
+            <summary>
+            Belirtilen yazar veritabanından silinir.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.BookController.AddBook(Library.Models.Book)">
+            <summary>
+            Kitap ekler, eklenen kitap onaysızdır.
+            Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
+            boş liste halinde gönderilmelidir.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.BookController.FindBooks">
+            <summary>
+            Onaylı kitapları çeker, ayrıntılar yoktur.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.BookController.FindUnapprovedBooks">
+            <summary>
+            Onaysız kitapları çeker, ayrıntılar yoktur.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.BookController.GetBook(System.UInt32)">
+            <summary>
+            Onaylı bir kitabı çeker, tüm ayrıntıları vardır.
+            Yalnızca onaylı ayrıntıları çeker.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.BookController.GetUnapprovedBook(System.UInt32)">
+            <summary>
+            Onaysız bir kitabı çeker, tüm ayrıntıları vardır.
+            Onaylı ve onaysız ayrıntıları çeker.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.BookController.UpdateBook(Library.Models.Book)">
+            <summary>
+            Belirtilen "id"ye sahip kaydı
+            belirtilen property ve değeri neyse onu kayıt üzerinden günceller.
+            "Approved" property'si güncellenecek olsa da olmasa da belirtilmeli
+            ve istenen değer gönderilmelidir aksi halde sürekli "false" atanır.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.BookController.DeleteBook(System.UInt32)">
+            <summary>
+            Belirtilen kitap veritabanından silinir.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.CategoryController.AddCategory(Library.Models.Category)">
+            <summary>
+            Kategori ekler, eklenen kategori onaysızdır.
+            Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
+            boş liste halinde gönderilmelidir.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.CategoryController.FindCategories">
+            <summary>
+            Onaylı kategorileri çeker, ayrıntılar yoktur.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.CategoryController.FindUnapprovedCategories">
+            <summary>
+            Onaysız kategorileri çeker, ayrıntılar yoktur.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.CategoryController.GetCategory(System.UInt32)">
+            <summary>
+            Onaylı bir kategoriyi çeker, tüm ayrıntıları vardır.
+            Yalnızca onaylı ayrıntıları çeker.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.CategoryController.GetUnapprovedCategory(System.UInt32)">
+            <summary>
+            Onaysız bir kategoriyi çeker, tüm ayrıntıları vardır.
+            Onaylı ve onaysız ayrıntıları çeker.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.CategoryController.UpdateCategory(Library.Models.Category)">
+            <summary>
+            Belirtilen "id"ye sahip kaydı
+            belirtilen property ve değeri neyse onu kayıt üzerinden günceller.
+            "Approved" property'si güncellenecek olsa da olmasa da belirtilmeli
+            ve istenen değer gönderilmelidir aksi halde sürekli "false" atanır.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.CategoryController.DeleteCategory(System.UInt32)">
+            <summary>
+            Belirtilen kategori veritabanından silinir.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.PublisherController.AddCategory(Library.Models.Publisher)">
+            <summary>
+            Yayıncı ekler, eklenen yayıncı onaysızdır.
+            Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
+            boş liste halinde gönderilmelidir.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.PublisherController.FindPublishers">
+            <summary>
+            Onaylı yayıncıları çeker, ayrıntılar yoktur.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.PublisherController.FindUnapprovedPublishers">
+            <summary>
+            Onaysız yayıncıları çeker, ayrıntılar yoktur.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.PublisherController.GetPublisher(System.UInt32)">
+            <summary>
+            Onaylı bir yayıncı çeker, tüm ayrıntıları vardır.
+            Yalnızca onaylı ayrıntıları çeker.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.PublisherController.GetUnapprovedPublisher(System.UInt32)">
+            <summary>
+            Onaysız bir yayıncı çeker, tüm ayrıntıları vardır.
+            Onaylı ve onaysız ayrıntıları çeker.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.PublisherController.UpdatePublisher(Library.Models.Publisher)">
+            <summary>
+            Belirtilen "id"ye sahip kaydı
+            belirtilen property ve değeri neyse onu kayıt üzerinden günceller.
+            "Approved" property'si güncellenecek olsa da olmasa da belirtilmeli
+            ve istenen değer gönderilmelidir aksi halde sürekli "false" atanır.
+            </summary>
+        </member>
+        <member name="M:Library.Controllers.PublisherController.DeletePublisher(System.UInt32)">
+            <summary>
+            Belirtilen yayıncı veritabanından silinir.
+            </summary>
+        </member>
+    </members>
+</doc>

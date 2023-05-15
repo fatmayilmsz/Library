@@ -1,7 +1,9 @@
 ﻿using Library.Models;
+using Library.utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections;
 using System.Reflection;
 
 namespace Library.Controllers
@@ -15,71 +17,114 @@ namespace Library.Controllers
             _context = librarycontext;
         }
 
-        [HttpGet, Route("users")]
-        public async Task<IActionResult> FindUsers()
+        [HttpPost, Route("users/add")]
+        //[Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> AddUser([FromBody] User user)
         {
-            return Ok(await _context.Users.ToListAsync());
-        }
-
-        [HttpDelete, Route("users/delete/{id}"), Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> DeleteUser(UInt32 id)
-        {
-            try
-            {
-                _context.Users.Remove(await _context.Users.Where(x => x.Id == id).FirstAsync());
-                await _context.SaveChangesAsync();
-                return Ok();
-            }
-            catch (Exception)
-            {
-
-                return NotFound();
-            }
-        }
-
-        [HttpPost, Route("users/add"), Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> AddUser(User user)
-        {
-            try
+            CustomResponseBody crb = new CustomResponseBody();
+            if (!await _context.Users
+                .AnyAsync(u => u.Email == user.Email))
             {
                 await _context.Users.AddAsync(user);
+                crb.Success += "User is added to collection.";
                 await _context.SaveChangesAsync();
-                return Ok();
+                crb.Success += "Changes are saved.";
+                return Ok(crb);
             }
-            catch (Exception)
-            {
+            crb.Error = "The user is already in database.";
+            return BadRequest(crb);
+        }
 
-                return BadRequest();
-            }
+        [HttpGet, Route("users")]
+        //[Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> FindUsers()
+        {
+            return Ok(await _context.Users.AsNoTracking().ToArrayAsync());
         }
 
         [HttpPut, Route("users/update")]
-        public async Task<IActionResult> UpdateUser(User user)
+        //[Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> UpdateUser([FromBody] User user)
         {
+            CustomResponseBody crb = new CustomResponseBody();
             try
             {
-                User userdb = await _context.Users.Where(x => x.Id == user.Id).FirstAsync();
+                User userDb = await _context.Users
+                    .Include(u => u.Books)
+                    .SingleAsync(u => u.Id == user.Id);
 
-                foreach (PropertyInfo prop in user.GetType().GetProperties())
+                foreach (PropertyInfo prop in user.GetType().GetProperties().ToArray())
                 {
-                    var propVal = prop.GetValue(user);
-                    if (propVal != null && !propVal.Equals("") && !propVal.Equals(0))
+                    var propVal = prop.GetValue(user) ?? null;
+                    if (propVal != null && !propVal.Equals("")
+                        && !propVal.Equals(0) && (propVal as ICollection)?.Count != 0
+                        && userDb.GetType().GetProperty(prop.Name) != null)
                     {
-                        if (userdb.GetType().GetProperty(prop.Name) != null)
+                        if (!LcUtils.GetDbSetTypes(_context).Any(dbSetType => dbSetType.Name == prop.Name))
                         {
-                            userdb.GetType().GetProperty(prop.Name).SetValue(userdb, propVal);
+                            userDb.GetType()?.GetProperty(prop.Name)?.SetValue(userDb, propVal);
                         }
+                        //else
+                        //{
+                        //    switch (prop.Name)
+                        //    {
+                        //        case "Books":
+                        //            if (user.Books != null)
+                        //            {
+                        //                Book[] newBooks = await _context.Books
+                        //                    .Where(b => user.Books!
+                        //                    .Select(b => b.Id)
+                        //                    .Contains(b.Id)).ToArrayAsync();
+                        //                if (newBooks.Length != 0)
+                        //                {
+                        //                    userDb.Books?.Clear();
+                        //                    userDb.Books = newBooks;
+                        //                }
+                        //                else
+                        //                {
+                        //                    crb.Warning += "Book Update Failed - No Book Matches\n";
+                        //                }
+                        //            }
+                        //            break;
+                        //    }
+                        //}
                     }
                 }
-                _context.Users.Update(userdb);
+                _context.Users.Update(userDb);
+                crb.Success += "Record is updated.";
                 await _context.SaveChangesAsync();
-
-                return Ok();
+                crb.Success += "Changes are saved.";
+                return Ok(crb);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                crb.Error += ex.Message;
+                return NotFound(crb);
+            }
+        }
 
-                return NotFound();
+        [HttpDelete, Route("users/delete/{id}")]
+        //[Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> DeleteUser(UInt32 id)
+        {
+            CustomResponseBody crb = new CustomResponseBody();
+            try
+            {
+                User tempUser = await _context.Users
+                    .Include(a => a.Books)
+                    .Where(a => a.Id == id).FirstAsync();
+                tempUser.Books.Clear();
+                crb.Success += "Assigned collection elements are deleted.";
+                _context.Users.Remove(tempUser);
+                crb.Success += "Record is deleted.";
+                await _context.SaveChangesAsync();
+                crb.Success += "Changes are saved.";
+                return Ok(crb);
+            }
+            catch (Exception ex)
+            {
+                crb.Error += ex.Message;
+                return NotFound(crb);
             }
         }
     }

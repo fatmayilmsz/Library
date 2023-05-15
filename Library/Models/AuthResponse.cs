@@ -10,5 +10,6 @@
         public int Role { get; set; }
         public string? Phone { get; set; }
         public string Token { get; set; }
+        public bool Approved { get; set; }
     }
 }
