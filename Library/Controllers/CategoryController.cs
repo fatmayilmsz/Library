@@ -194,6 +194,8 @@ namespace Library.Controllers
             try
             {
                 Category categorydb = await _context.Categories
+                    .Include(c => c.Books)
+                    .Include(c => c.Authors)
                     .SingleAsync(c => c.Id == category.Id);
 
                 foreach (PropertyInfo prop in category.GetType().GetProperties().ToArray())
