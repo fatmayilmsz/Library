@@ -19,15 +19,14 @@ namespace Library.Controllers
 
         /// <summary>
         /// Kitap ekler, eklenen kitap onaysızdır.
-        /// Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
-        /// boş liste halinde gönderilmelidir.
         /// </summary>
         [HttpPost, Route("books/add")]
         public async Task<IActionResult> AddBook([FromBody] Book book)
         {
             CustomResponseBody crb = new CustomResponseBody();
             //bool check = book.Authors?.Count != 0 && book.Authors != null ? await _context.Authors.AnyAsync(a => book.Authors.Any(auth => auth == a)) : true;
-            if (book != null && !await _context.Books.Include(b => b.Authors)
+            if (book != null && !await _context.Books
+                .Include(b => b.Authors)
                 .AnyAsync(b => b.Name == book.Name))
             {
                 if (book.Image != null && book.Image.Length != 0)
@@ -50,30 +49,37 @@ namespace Library.Controllers
                     }
                 }
 
-                Author[] matchedAuthors = await _context.Authors
+                book.Authors = book.Authors != null ? await _context.Authors
                     .Where(a => book.Authors!
                     .Select(author => author.Id)
                         .Contains(a.Id))
-                    .ToArrayAsync();
+                    .ToArrayAsync() : null;
 
-                Publisher[] matchedPublishers = await _context.Publishers
+                book.Publishers = book.Publishers != null ? await _context.Publishers
                     .Where(p => book.Publishers!
                     .Select(publisher => publisher.Id)
                         .Contains(p.Id))
-                    .ToArrayAsync();
+                    .ToArrayAsync() : null;
 
-                Category[] matchedCategories = await _context.Categories
+                book.Categories = book.Categories != null ? await _context.Categories
                     .Where(c => book.Categories!
                     .Select(cat => cat.Id)
                         .Contains(c.Id))
-                    .ToArrayAsync();
+                    .ToArrayAsync() : null;
+
+                book.Users = book.Users != null ? await _context.Users
+                    .Where(u => book.Users!
+                    .Select(user => user.Id)
+                        .Contains(u.Id))
+                    .ToArrayAsync() : null;
 
                 await _context.Books.AddAsync(new Book()
                 {
                     Name        =   book.Name,
-                    Authors     =   matchedAuthors,
-                    Publishers  =   matchedPublishers,
-                    Categories  =   matchedCategories,
+                    Authors     =   book.Authors,
+                    Publishers  =   book.Publishers,
+                    Categories  =   book.Categories,
+                    Users       =   book.Users,
                     Summary     =   book.Summary,
                     Image       =   book.Image,
                     Approved    =   false
@@ -84,7 +90,7 @@ namespace Library.Controllers
                 crb.Success += "Changes are saved.";
                 return Accepted(crb);
             }
-            crb.Error += "The book already in db or one or more collections are null. Try to assign an empty list to collections.";
+            crb.Error += "The book already in database.";
             return BadRequest(crb);
         }
 

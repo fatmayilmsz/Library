@@ -20,8 +20,6 @@ namespace Library.Controllers
 
         /// <summary>
         /// Yazar ekler, eklenen yazar onaysızdır.
-        /// Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
-        /// boş liste halinde gönderilmelidir.
         /// </summary>
         [HttpPost, Route("authors/add")]
         public async Task<IActionResult> AddAuthor([FromBody] Author author)
@@ -31,41 +29,25 @@ namespace Library.Controllers
                 .AnyAsync(a => a.Name + a.Lastname == author.Name + author.Lastname))
             {
 
-                Category[] matchedCategories = await _context.Categories
+                author.Categories = author.Categories != null ? await _context.Categories
                     .Where(c => author.Categories!
                     .Select(cat => cat.Id)
                         .Contains(c.Id))
-                    .ToArrayAsync();
+                    .ToArrayAsync() : null;
 
-                Book[] matchedBooks = await _context.Books
+                author.Books = author.Books != null ? await _context.Books
                     .Where(b => author.Books!
                     .Select(cat => cat.Id)
                         .Contains(b.Id))
-                    .ToArrayAsync();
-
-                if (!matchedCategories.Any(c => author
-                    .Categories
-                    .Select(cat => cat.Id)
-                        .Contains(c.Id))
-                    ||
-                    !matchedBooks.Any(b => author
-                    .Categories
-                    .Select(book => book.Id)
-                        .Contains(b.Id))
-                    )
-                {
-                    crb.Warning += "Some/all specified categories or " +
-                        "books are not in db.";
-                }
-                else crb.Success += "All specified collections are assigned.";
+                    .ToArrayAsync() : null;
 
                 await _context.Authors.AddAsync(new Author
                 {
                     Name = author.Name,
                     Lastname = author.Lastname,
                     Image = author.Image,
-                    Categories = matchedCategories,
-                    Books = matchedBooks,
+                    Categories = author.Categories,
+                    Books = author.Books,
                     Approved = false
                 });
 
@@ -74,7 +56,7 @@ namespace Library.Controllers
                 crb.Success += "Changes are saved.";
                 return Ok(crb);
             }
-            crb.Error = "The author is already in database or one or more collections are null. Try to assign an empty list to collections.";
+            crb.Error = "The author is already in database.";
             return BadRequest(crb);
         }
 
