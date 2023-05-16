@@ -18,8 +18,6 @@ namespace Library.Controllers
 
         /// <summary>
         /// Yayıncı ekler, eklenen yayıncı onaysızdır.
-        /// Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
-        /// boş liste halinde gönderilmelidir.
         /// </summary>
         [HttpPost, Route("publishers/add")]
         public async Task<IActionResult> AddCategory([FromBody] Publisher publisher)
@@ -28,25 +26,16 @@ namespace Library.Controllers
             if (!await _context.Publishers.AnyAsync(p => p.Name == publisher.Name))
             {
 
-                Book[] matchedBooks = await _context.Books
+                publisher.Books = publisher.Books != null ? await _context.Books
                     .Where(b => publisher.Books!
                     .Select(book => book.Id)
                         .Contains(b.Id))
-                    .ToArrayAsync();
+                    .ToArrayAsync() : null;
 
-                if (
-                    !matchedBooks.Any(b => publisher
-                    .Books
-                    .Select(book => book.Id)
-                        .Contains(b.Id))
-                    )
-                {
-                    crb.Warning += "Some/all specified publishers are not in db\n";
-                }
                 await _context.Publishers.AddAsync(new Publisher
                 {
                     Name = publisher.Name,
-                    Books = matchedBooks,
+                    Books = publisher.Books,
                     Approved = false
                 });
                 crb.Success += "Publisher is added to collection.";
@@ -54,7 +43,7 @@ namespace Library.Controllers
                 crb.Success += "Changes are saved.";
                 return Ok(crb);
             }
-            crb.Error += "The publisher already in db or one or more collections are null. Try to assign an empty list to collections.";
+            crb.Error += "The publisher already in database.";
             return BadRequest(crb);
         }
 

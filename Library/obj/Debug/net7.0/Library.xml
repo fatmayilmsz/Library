@@ -7,8 +7,6 @@
         <member name="M:Library.Controllers.AuthorController.AddAuthor(Library.Models.Author)">
             <summary>
             Yazar ekler, eklenen yazar onaysızdır.
-            Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
-            boş liste halinde gönderilmelidir.
             </summary>
         </member>
         <member name="M:Library.Controllers.AuthorController.FindAuthors">
@@ -49,8 +47,6 @@
         <member name="M:Library.Controllers.BookController.AddBook(Library.Models.Book)">
             <summary>
             Kitap ekler, eklenen kitap onaysızdır.
-            Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
-            boş liste halinde gönderilmelidir.
             </summary>
         </member>
         <member name="M:Library.Controllers.BookController.FindBooks">
@@ -91,8 +87,6 @@
         <member name="M:Library.Controllers.CategoryController.AddCategory(Library.Models.Category)">
             <summary>
             Kategori ekler, eklenen kategori onaysızdır.
-            Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
-            boş liste halinde gönderilmelidir.
             </summary>
         </member>
         <member name="M:Library.Controllers.CategoryController.FindCategories">
@@ -133,8 +127,6 @@
         <member name="M:Library.Controllers.PublisherController.AddCategory(Library.Models.Publisher)">
             <summary>
             Yayıncı ekler, eklenen yayıncı onaysızdır.
-            Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
-            boş liste halinde gönderilmelidir.
             </summary>
         </member>
         <member name="M:Library.Controllers.PublisherController.FindPublishers">

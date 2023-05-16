@@ -22,14 +22,17 @@ namespace Library.Controllers
         {
             return Ok(await _context.Users
                 .AsNoTracking()
-                .Where(u => u.Books.Count > 0)
+                .Where(u => u.Books.Count > 0 && u.Approved)
                 .Select(u => new
                 {
                     u.Id,
+                    u.Approved,
                     Books = u.Books
+                        .Where(u => u.Approved)
                         .Select(u => new
                         {
-                            u.Id
+                            u.Id,
+                            u.Approved
                         })
                 })
                 .ToArrayAsync());

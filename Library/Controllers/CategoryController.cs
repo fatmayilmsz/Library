@@ -18,8 +18,6 @@ namespace Library.Controllers
 
         /// <summary>
         /// Kategori ekler, eklenen kategori onaysızdır.
-        /// Koleksiyon halindeki DbSet tipleri eğer atama yapılmayacaksa
-        /// boş liste halinde gönderilmelidir.
         /// </summary>
         [HttpPost, Route("categories/add")]
         public async Task<IActionResult> AddCategory([FromBody] Category category)
@@ -27,37 +25,23 @@ namespace Library.Controllers
             CustomResponseBody crb = new CustomResponseBody();
             if (!await _context.Categories.AnyAsync(a => a.Name == category.Name))
             {
-                Author[] matchedAuthors = await _context.Authors
+                category.Authors = category.Authors != null ? await _context.Authors
                     .Where(a => category.Authors!
                     .Select(author => author.Id)
                         .Contains(a.Id))
-                    .ToArrayAsync();
+                    .ToArrayAsync() : null;
 
-                Book[] matchedBooks = await _context.Books
+                category.Books = category.Books != null ? await _context.Books
                     .Where(b => category.Books!
                     .Select(cat => cat.Id)
                         .Contains(b.Id))
-                    .ToArrayAsync();
-
-                if (!matchedAuthors.Any(a => category
-                    .Authors
-                    .Select(author => author.Id)
-                        .Contains(a.Id))
-                    ||
-                    !matchedBooks.Any(b => category
-                    .Books
-                    .Select(book => book.Id)
-                        .Contains(b.Id))
-                    )
-                {
-                    crb.Warning += "Some/all specified authors or books are not in db.";
-                }
+                    .ToArrayAsync() : null;
 
                 await _context.Categories.AddAsync(new Category
                 {
                     Name = category.Name,
-                    Books = matchedBooks,
-                    Authors = matchedAuthors,
+                    Books = category.Books,
+                    Authors = category.Authors,
                     Approved = false
                 });
                 crb.Success += "Category is added to collection.";
@@ -65,7 +49,7 @@ namespace Library.Controllers
                 crb.Success += "Changes are saved.";
                 return Ok(crb);
             }
-            crb.Error += "The category already in db or one or more collections are null. Try to assign an empty list to collections.";
+            crb.Error += "The category already in database.";
             return BadRequest(crb);
         }
 
