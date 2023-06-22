@@ -39,7 +39,7 @@ builder.Services.AddSwaggerGen(options =>
     string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     options.IncludeXmlComments(xmlPath);
-    //options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Library.xml"));
+    options.SchemaFilter<SwaggerExcludeAttribute>();
 });
 
 // Authentication and Authorization: Kimlik doğrulama ve yetkilendirme ayarlarını yapılandırır.

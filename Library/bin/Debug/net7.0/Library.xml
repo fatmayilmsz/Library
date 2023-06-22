@@ -4,6 +4,11 @@
         <name>Library</name>
     </assembly>
     <members>
+        <member name="P:Library.Models.Author.Id">
+            <summary>
+            dghsetg
+            </summary>
+        </member>
         <member name="M:Library.Controllers.AuthorController.AddAuthor(Library.Models.Author)">
             <summary>
             Yazar ekler, eklenen yazar onaysızdır.
