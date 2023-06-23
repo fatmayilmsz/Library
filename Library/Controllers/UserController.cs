@@ -62,7 +62,10 @@ namespace Library.Controllers
                     {
                         if (!LcUtils.GetDbSetTypes(_context).Any(dbSetType => dbSetType.Name == prop.Name))
                         {
-                            userDb.GetType()?.GetProperty(prop.Name)?.SetValue(userDb, propVal);
+                            if (prop.Name != "Role" || prop.Name == "Role" && (byte)propVal != 0)
+                            {
+                                userDb.GetType()?.GetProperty(prop.Name)?.SetValue(userDb, propVal);
+                            }
                         }
                         //else
                         //{

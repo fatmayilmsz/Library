@@ -4301,23 +4301,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Otlar\\.nuget\\packages\\": {},
+    "C:\\Users\\ygtle\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Otlar\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\Library.csproj",
+      "projectUniqueName": "C:\\Users\\ygtle\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\Library.csproj",
       "projectName": "Library",
-      "projectPath": "C:\\Users\\Otlar\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\Library.csproj",
-      "packagesPath": "C:\\Users\\Otlar\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Otlar\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\obj\\",
+      "projectPath": "C:\\Users\\ygtle\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\Library.csproj",
+      "packagesPath": "C:\\Users\\ygtle\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\ygtle\\OneDrive\\Belgeler\\GitHub\\Library\\Library\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Otlar\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\ygtle\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -4326,6 +4326,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\sdk\\7.0.304\\Sdks\\Microsoft.NET.Sdk.Web\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -4412,7 +4413,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.202\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.304\\RuntimeIdentifierGraph.json"
       }
     }
   }

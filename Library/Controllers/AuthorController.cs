@@ -2,6 +2,7 @@
 using Library.utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp.Formats.Jpeg;
 using System.Collections;
 using System.Data;
 using System.Linq;
@@ -28,6 +29,26 @@ namespace Library.Controllers
             if (!await _context.Authors
                 .AnyAsync(a => a.Name + a.Lastname == author.Name + author.Lastname))
             {
+
+                if (author.Image != null && author.Image.Length != 0)
+                {
+                    using (System.IO.MemoryStream ms = new MemoryStream(author.Image)) //Görselin kalitesi düşürülür
+                    {
+                        using (SixLabors.ImageSharp.Image image = Image.Load(ms))
+                        {
+                            image.Mutate(ipc => ipc.Resize(new ResizeOptions
+                            {
+                                Size = new Size(150, 210),
+                                Mode = ResizeMode.Max,
+                                Compand = true
+                            }));
+                            ms.SetLength(0);
+                            await image.SaveAsync(ms, new JpegEncoder { Quality = 80 });
+                            author.Image = ms.ToArray();
+                            crb.Success += "Image successfuly resized.";
+                        }
+                    }
+                }
 
                 author.Categories = author.Categories != null ? await _context.Categories
                     .Where(c => author.Categories!
